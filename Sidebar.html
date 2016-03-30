@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  </head>
+  <style>
+    .branding-below {
+      bottom: 56px;
+      top: 0;
+    }
+
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+
+    .main-block{
+      margin-left:10px;
+    }
+
+    .main-block button{
+      margin:1px;
+      width: 12em;
+      text-transform: uppercase;
+    }
+  </style>
+  <body>
+    <div class="sidebar branding-below">
+        <div class="main-block">
+          <h1>Data Requests </h1>
+          <button id="add-in-line-data">Add in-line data</button><br>
+          <button id="add-table">Add table</button><br>
+          <button id="add-figure">Add figure</button>
+          
+          <h1><br>Code Script</h1>
+          <button id="download_rmd">Download Rmd</button>
+
+          <h1><br>Data Entries</h1>
+          <button id="update" class="blue">Update</button><br>
+          <button id="remove-keys" class="red" disabled>Remove keys</button><br>
+          <div id="error-area"></div>
+        </div>
+    </div>
+    <div class="sidebar bottom">
+        <span class="gray branding-text">Data Injector</span>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+    </script>
+    <script>
+    var main = function (){
+    $('#add-in-line-data').click(add_in_line_data);
+    $('#add-table').click(add_table);
+    $('#add-figure').click(add_figure);
+    $('#update').click(update);
+    $('#remove-keys').click(remove_keys);
+    $("#download_rmd").click(downloadFiles);
+    };
+    
+    var add_in_line_data =  function(){
+      //showMsg("Pushed add in-line data button");
+      google.script.run.requestInlineData();
+    };
+    var add_table =  function(){
+      //showMsg("Pushed add table button");
+      google.script.run.requestTable();
+    };
+    var add_figure =  function(){
+      google.script.run.requestFigure();
+      //showMsg("Pushed add figure button");
+    };
+    var update =  function(){
+      //showMsg("Pushed update button");
+      google.script.run.withSuccessHandler(showMsg)
+        .injectSpreadsheetData();
+    };
+    var remove_keys =  function(){
+      //showMsg("Pushed remove keys");
+    };
+    var downloadFiles = function(){
+      google.script.run.generateRmarkdownDoc();
+    };
+    
+    /**
+    * Inserts a div that contains an error message after a given element.
+    *
+    * @param msg The error message to display.
+    * @param element The element after which to display the error.
+    */
+    var showMsg = function (msg) {
+      var div = $('<div id="error" class="error">' + msg + '</div>');
+      $('#error-area').after(div);
+    }
+    
+    $(document).ready(main);
+    </script>
+  </body>
+</html>

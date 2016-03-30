@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <base target="_top">
+  </head>
+  <style>
+  .upper{
+      text-transform: uppercase;
+  }
+  </style>
+  <body>
+    <div class="upper">
+    <form>
+      Instructions for analyst:<br> <textarea type="text" style="height:100px;width:300px" id = "instructions"></textarea>
+      <br><br>
+      Format: (Don't forget the units) <br><input type="text" style="width:300px;" id = "format"></input>
+      <br><br>
+      <button class="blue upper" id="request-inline-data-submit">Submit</button>
+    </form>
+  </div><div id="error-area"></div>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+ </script>
+ <script>
+ 
+ var main = function(){
+   $('#request-inline-data-submit').click(request_inline_data_submit);
+   document.getElementById('instructions').placeholder  = 'Indicate both the statistic and the sub-group to which it applies. \n\n Example: median (min, max) of baseline albumin among cirrhotics treated with boceprevir.';
+   document.getElementById('format').placeholder = "Example: MM units (Min: XX, max: YY)"; 
+   
+   //Check to see if data is selected;  If so, fill in the instruction and format inputs;
+   google.script.run.withSuccessHandler(fillInFormat).getTextOfSelection();
+   document.getElementById('instructions').focus();
+ };
+ 
+ var request_inline_data_submit = function(){
+   //showMsg("Pushed submit button");
+   var instructions = document.getElementById('instructions').value;
+   var format = document.getElementById('format').value;
+   if(format == "" || instructions == ""){
+     $('#error').remove();
+     showMsg("Please provide instructions and formatting information."); 
+   }else{
+     google.script.run.addRequestedInlineDataToSpreadsheet(format,instructions);
+     google.script.host.close();
+     }
+ };
+ 
+ var showMsg = function (msg) {
+   var div = $('<div id="error" class="error">' + msg + '</div>');
+   $('#error-area').after(div);
+ };
+ 
+ var fillInFormat = function(text){
+   document.getElementById('format').value = text;
+ }
+ 
+ 
+ $(document).ready(main);
+ </script>
+  </body>
+</html>

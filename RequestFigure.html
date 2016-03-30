@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <base target="_top">
+  </head>
+  <style>
+  .upper{
+      text-transform: uppercase;
+  }
+  </style>
+  <body>
+    <div class="upper">
+    <form>
+      Instructions:<br> <textarea type="text" style="height:100px;width:300px" id = "instructions"></textarea>
+      <br><br>
+      <button class="blue upper" id="request-figure-submit">Submit</button>
+    </form>
+  </div><div id="error-area"></div>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+ </script>
+ <script>
+ 
+ var main = function(){
+   showMsg("Got here");
+   $('#request-figure-submit').click(request_figure_submit);
+   document.getElementById('instructions').placeholder  = 'Title or Caption';
+   
+   //Check to see if data is selected;  If so, fill in the instruction and format inputs;
+   document.getElementById('instructions').focus();
+ };
+     //request_figure_submit
+ var request_figure_submit = function(){
+   showMsg("Pushed submit button");
+   var instructions = document.getElementById('instructions').value;
+   showMsg(instructions);
+   google.script.run.addRequestedFigureToSpreadsheet(instructions);
+   google.script.host.close();
+ };
+ 
+ var showMsg = function (msg) {
+   var div = $('<div id="error" class="error">' + msg + '</div>');
+   $('#error-area').after(div);
+ };
+
+ 
+ $(document).ready(main);
+ </script>
+  </body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  </head>
+  <style>
+    .branding-below {
+      bottom: 56px;
+      top: 0;
+    }
+
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+
+    .code{  
+      font-family:"Courier New";  
+      font-size: 9px;   
+    }
+    
+    .buttons{
+      text-align:center;
+      width: 250px;
+    }
+    
+    #previous, #close, #next, #download_rmd{
+      margin: 2px;
+    }
+</style>
+  <body>
+  <div class="sidebar branding-below">
+  <form>
+       Key: <select id="key-list">
+  <option value="0" selected="selected">0</option>
+  </select> <button id="update-key-list">Update key list</button>
+  <br><br>
+      Instructions:<br> <textarea type="text" style="height:100px;width:250px" id = "instructions"></textarea>
+      <br>
+      Format:<br><input type="text" style="width:250px;" id = "format"></input>
+      <br>
+      Calculated value:<br><input type="text" style="width:250px;" id = "calculated-value"></input>
+      <br>
+      Code:<br> <textarea type="text" style="height:300px;width:250px" class="code" id = "code"></textarea>
+      <br>
+      <div class="buttons">
+      <button id="previous">Previous</button><button id="close">Close</button><button id="next">Next</button><br>
+      <button class="blue" id="download_rmd">Download Rmd and Script Files</button></div>
+    </form>
+  <div id="error-area"></div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+  </script>
+  <script>
+  
+    var OLD_instructions = '';
+    var OLD_format = '';
+    var OLD_code = '';
+    var OLD_key = 0;
+  
+  var main = function(){
+    google.script.run.withSuccessHandler(loadKeyValues).getKeyValues();
+    //showMsg("Got Keys");
+    google.script.run.withSuccessHandler(updateReviewFields).withFailureHandler(clearReviewFields).getSpreadsheetRowByKey(0);
+    //Set OLD instructions, format, and code as global variables;
+    var OLD_key = document.getElementById('key-list').value;
+    $("#update-key-list").click(update_key_list);
+    $("#key-list").change(newKeySelected);
+    $("#next").click(nextKey);
+    $("#close").click(closeReviewBar);
+    $("#previous").click(previousKey);
+    $("#download_rmd").click(downloadFiles);
+    //showMsg("Got to end of Main");
+  };
+  
+  var closeReviewBar = function(){
+    var key = document.getElementById('key-list').value;
+    replaceLineOfSpreadsheetDataByKey(key);
+    google.script.host.close();
+  };
+  
+  var downloadFiles = function(){
+    var key = document.getElementById('key-list').value;
+    replaceLineOfSpreadsheetDataByKey(key);
+    google.script.run.generateRmarkdownDoc();
+  };
+  
+  var nextKey = function(){
+    var key = document.getElementById('key-list').value;
+    replaceLineOfSpreadsheetDataByKey(key);
+    $("#key-list option:selected")
+        .prop("selected", false)
+        .next()
+        .prop("selected", true);
+    $('#key-list').trigger("change");
+  };
+  
+  var previousKey = function(){
+    var key = document.getElementById('key-list').value;
+    replaceLineOfSpreadsheetDataByKey(key);
+    $("#key-list option:selected")
+        .prop("selected", false)
+        .prev()
+        .prop("selected", true);
+    $('#key-list').trigger("change");
+  };
+  
+  var newKeySelected = function(){
+    replaceLineOfSpreadsheetDataByKey(OLD_key);
+    var theValue = this.value;
+    google.script.run.withSuccessHandler(updateReviewFields).withFailureHandler(clearReviewFields).getSpreadsheetRowByKey(theValue);
+    OLD_key = theValue;
+  };
+  
+  var clearReviewFields = function(rowData){
+    document.getElementById('instructions').value = "ERROR - Data did not loaded.";
+    document.getElementById('format').value = "";
+    document.getElementById('code').value = "";
+    OLD_instructions = document.getElementById('instructions').value;
+    OLD_format = document.getElementById('format').value;
+    OLD_code = document.getElementById('code').value;
+  }
+  
+  var updateReviewFields = function(rowData){
+    document.getElementById('instructions').value = rowData[3];
+    document.getElementById('format').value = rowData[2];
+    document.getElementById('calculated-value').value = rowData[1];
+    document.getElementById('calculated-value').disabled = true;
+    document.getElementById('code').value = rowData[4];
+    OLD_instructions = document.getElementById('instructions').value;
+    OLD_format = document.getElementById('format').value;
+    OLD_code = document.getElementById('code').value;
+  };
+  
+  var replaceLineOfSpreadsheetDataByKey = function(key){
+    var instructions = document.getElementById('instructions').value;
+    var format = document.getElementById('format').value;
+    var calculated_value = document.getElementById('calculated-value').value;
+    var code = document.getElementById('code').value;
+    var line = {key: key, calculated_value: calculated_value, format: format, instructions: instructions, code: code};
+    if( instructions !== OLD_instructions || format !== OLD_format || code !== OLD_code){
+      if( instructions !== "ERROR - Data did not loaded."){
+        google.script.run.replaceLineOfSpreadsheetDataByKey(line);      
+      }
+    }
+  }
+  
+  var update_key_list = function(){
+    $('#key-list')
+    .find('option')
+    .remove()
+    .end()
+    .append('<option value="0">0</option>')
+    .val('0');
+    google.script.run.withSuccessHandler(loadKeyValues).getKeyValues();
+  };
+  
+  var loadKeyValues = function(keyValues){
+    var key_list = $('#key-list');
+    $.each(keyValues, function(idx,key) {   
+       key_list
+         .append($("<option></option>")
+         .attr("value",key)
+         .text(key)); 
+         });
+  };
+  
+  var showMsg = function (msg) {
+  var div = $('<div id="error" class="error">' + msg + '</div>');
+  $('#error-area').after(div);
+  };
+  
+  $(document).ready(main);
+  </script>
+  </body>
+</html>
