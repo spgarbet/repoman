@@ -1,0 +1,43 @@
+% Going to apply technique from http://tex.stackexchange.com/questions/88200/write-the-value-of-enumerate-to-output-file
+
+\documentclass[11pt]{article}
+
+\usepackage{float}
+\usepackage{tabularx}
+
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{.125in}
+\setlength{\textwidth}{6.25in}
+\begin{document}
+\title{LaTeX Test of Auto-Indexing Data}
+\author{Shawn Garbett\\
+Vanderbilt University Biostatistics}
+\renewcommand{\today}{April 4, 2016}
+\maketitle
+
+\section{Example Table from Hmisc:summaryM}
+
+\begin{table}[H]
+\caption{Descriptive Statistics  $(N=418)$. {\scriptsize $a$\ }{$b$\ }{\scriptsize $c$\ } represent the lower quartile $a$, the median $b$, and the upper quartile $c$\ for continuous variables. $N$\ is the number of non--missing values.\label{s5}} 
+\begin{center}
+\begin{tabular}{lrccc}
+\hline\hline
+\multicolumn{1}{l}{}&\multicolumn{1}{c}{N}&\multicolumn{1}{c}{D-penicillamine}&\multicolumn{1}{c}{placebo}&\multicolumn{1}{c}{not randomized}\tabularnewline
+&&\multicolumn{1}{c}{{\scriptsize $N=154$}}&\multicolumn{1}{c}{{\scriptsize $N=158$}}&\multicolumn{1}{c}{{\scriptsize $N=106$}}\tabularnewline
+\hline
+Serum~Bilirubin~(mg/dl)&418&{\scriptsize 0.725~}{1.300 }{\scriptsize 3.600} &{\scriptsize 0.800~}{1.400 }{\scriptsize 3.200} &{\scriptsize 0.725~}{1.400 }{\scriptsize 3.075} \tabularnewline
+Albumin~(gm/dl)&418&{\scriptsize 3.34~}{3.54 }{\scriptsize 3.78} &{\scriptsize 3.21~}{3.56 }{\scriptsize 3.83} &{\scriptsize 3.12~}{3.47 }{\scriptsize 3.72} \tabularnewline
+Histologic~Stage,~Ludwig~Criteria~:~1&412&0.03~{\scriptsize~$\frac{~4}{154}$}&0.08~{\scriptsize~$\frac{12}{158}$}&0.05~{\scriptsize~$\frac{~5}{100}$}\tabularnewline
+~~~~2&&0.21~{\scriptsize~$\frac{32}{154}$}&0.22~{\scriptsize~$\frac{35}{158}$}&0.25~{\scriptsize~$\frac{25}{100}$}\tabularnewline
+~~~~3&&0.42~{\scriptsize~$\frac{64}{154}$}&0.35~{\scriptsize~$\frac{56}{158}$}&0.35~{\scriptsize~$\frac{35}{100}$}\tabularnewline
+~~~~4&&0.35~{\scriptsize~$\frac{54}{154}$}&0.35~{\scriptsize~$\frac{55}{158}$}&0.35~{\scriptsize~$\frac{35}{100}$}\tabularnewline
+Prothrombin~Time~(sec.)&416&{\scriptsize 10.0~}{10.6 }{\scriptsize 11.4} &{\scriptsize 10.0~}{10.6 }{\scriptsize 11.0} &{\scriptsize 10.1~}{10.6 }{\scriptsize 11.0} \tabularnewline
+sex~:~female&418&0.90~{\scriptsize~$\frac{139}{154}$}&0.87~{\scriptsize~$\frac{137}{158}$}&0.92~{\scriptsize~$\frac{~98}{106}$}\tabularnewline
+Age&418&{\scriptsize 41.4~}{48.1 }{\scriptsize 55.8} &{\scriptsize 43.0~}{51.9 }{\scriptsize 58.9} &{\scriptsize 46.0~}{53.0 }{\scriptsize 61.0} \tabularnewline
+spiders&312&0.29~{\scriptsize~$\frac{~45}{154}$}&0.28~{\scriptsize~$\frac{~45}{158}$}&\tabularnewline
+\hline
+\end{tabular}\end{center}
+
+\end{table}
+\end{document}
