@@ -1,3 +1,5 @@
+.PHONY: clean
+
 filename=tables
 
 pdf: ps
@@ -29,4 +31,11 @@ aread:
 	acroread ${filename}.pdf
 
 clean:
-	rm -f ${filename}.{ps,pdf,log,aux,out,dvi,bbl,blg}
+	rm -f *.ps
+	rm -f *.pdf
+	rm -f *.log
+	rm -f *.aux
+	rm -f *.out
+	rm -f *.dvi
+	rm -f *.bbl
+	rm -f *.blg
