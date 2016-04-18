@@ -94,7 +94,33 @@ This demonstrates the feasibility of constructing objects which correspond to th
 
 An alternate approach would be to have a Table be a grid of Tables or a Renderable Cell. Boundaries are defined in a recursive manner into a table. Formal definition is in table-recursive.hs at present, but this hasn't compiled. The current pursuit is table as a collection of rows.
 
+Further thought on this topic yields this as a better solution, but more complicated. This is like going from 1-dimensional to 2-dimenstional representation. The row based approach will be taken first, to work out issues before moving onto a 2-d representation of the table grammar.
+
+### Backus-Naur Form (BNF) for formula syntax
+
+       <table-formula>        ::= <column-specification> "~" <row-specification>
+       <column-specification> ::= <formula>
+       <row-specification>    ::= <formula>
+       <formula>              ::= <expression> "+" <formula> | <expression>
+       <expression>           ::= <data-name> "*" <expression>          | 
+                                  <data-name>                           |
+                                  "(" <table-formula> ")"               | 
+                                  <transform-name> "(" <expression> ")" |
+                                  <r-expression>
+
+The "+" operator denotes major spilts in row / column designations.
+
+The "*" operator denotes factorial combinations of expressions.
+
+Data-name is the name of a column (_or_row) in the given data set.
+
+The recursive descent into another table formula would be a possible 2-D representation mentioned in design. Not for development in Phase I. 
+
+The r-expression is the last attempt at resolving a formula reference. The contents will be evaluated in the current R context, and the results will be used as the data column (_or row_).
+
 ### Design Choices
 
 * Reference Class approach will be attempted first.
+
+
 
