@@ -32,6 +32,21 @@ cat("token found", t$id, "\n")
 cat("peek found", nt$id, "\n")
        return(nt)
     },
+    r_expression = function()
+    {
+      match <- str_match(substr(input, pos, len), "^[^\\(\\)]*")
+      pos <<- pos + nchar(match[1,1])
+      c <- substr(input, pos, pos)
+      if (c == "(" )
+      {
+        pos <<- pos + 1
+        r_expression()
+        token(")")
+        return(NA)
+      }
+
+      return(NA)
+    },
     expression = function()
     {
       nt <- nextToken()
@@ -48,7 +63,7 @@ cat("peek found", nt$id, "\n")
       if(nt$name == "I") # R-expression
       {
         token("LPAREN")
-        # FIXME, gobble anything up to next RPAREN
+        r_expression()
         token("RPAREN") 
         return(NA)
       }
@@ -138,6 +153,8 @@ pr <- Parser$new()
 pr$run("y ~ x")
 cat("----------\n")
 pr$run("col1 + col2 ~ drug*age+spiders")
+
+pr$run("I(10^23*rough) ~ spiders + (youth ~ age)")
 
 
 #recursiveDescent <- function(tableFormula)
