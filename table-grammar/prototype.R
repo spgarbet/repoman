@@ -2,19 +2,28 @@
 library(Hmisc)
 getHdata(pbc)
 
-# Objects to return from functions
-fraction <- function(numerator, denominator)
-{
-    structure(list(numerator=numerator, denominator=denominator),
-              class="fraction")
-}
 
-rmarkdown.fraction <- function(x)
-{
-    paste(round(100*x$numerator/x$denominator),
-          "% $$\\frac{", x$numerator,
-          "}{", x$denominator,"}$$", sep="")
-}
+f <- formula("drug ~ bili + albumin + stage + protime + sex + age + spiders")
+model.matrix(f, data=pbc)
+
+row0 <- pbc[FALSE,]
+model.matrix(f, data=row0)
+
+
+# S4
+setClass("Fraction", slots=list(numerator="numeric", denominator="numeric"))
+
+# Objects to return from functions
+f <- new("Fraction", numerator=numerator, denominator=denominator)
+
+setMethod("rmarkdown",
+          "Fraction",
+          function(x) { paste(round(100*x@numerator/x@denominator),
+          "% $$\\frac{", x@numerator,
+          "}{", x@denominator,"}$$", sep="")
+          }
+)
+
 summary.fraction <- function(x)
 {
    paste(round(100*x$numerator/x$denominator)),

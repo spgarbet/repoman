@@ -106,13 +106,13 @@ Further thought on this topic yields this as a better solution, but more complic
                                   <data-name>                           |
                                   "(" <table-formula> ")"               | 
                                   <transform-name> "(" <expression> ")" |
-                                  <r-expression>
+                                  "I(" <r-expression> ")"
 
 The "+" operator denotes major spilts in row / column designations.
 
 The "*" operator denotes factorial combinations of expressions.
 
-Data-name is the name of a column (_or_row) in the given data set.
+Data-name is the name of a column (_or row_) in the given data set.
 
 The recursive descent into another table formula would be a possible 2-D representation mentioned in design. Not for development in Phase I. 
 
