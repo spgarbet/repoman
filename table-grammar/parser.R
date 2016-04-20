@@ -21,15 +21,12 @@ Parser <- setRefClass("Parser",
         stop(paste("Expecting",id,"before '",substr(input,pos,len),"'"))
       }
 
-cat("token found", t$id, "\n")
-
       t
     },
     peek = function()
     {
        nt   <-  nextToken()
        pos  <<- pos - length(nt$name)
-cat("peek found", nt$id, "\n")
        return(nt)
     },
     r_expression = function()
@@ -52,11 +49,11 @@ cat("peek found", nt$id, "\n")
       nt <- nextToken()
       if(nt$id == "LPAREN")
       {
-        tableFormula() 
+        tableFormula()
         token("RPAREN")
         return(NA)
       }
-      if(nt$id != "NAME")
+      if(nt$id != "NAME") # An expression starts with either a name or a '('
       {
         stop(paste("Unrecognized token",nt$name,"before",substr(input,pos,len)))
       }
@@ -67,7 +64,7 @@ cat("peek found", nt$id, "\n")
         token("RPAREN") 
         return(NA)
       }
-      pk <- peek()
+      pk <- peek() # What follows the name determines next grammar element
       if(pk$id == "TIMES")
       {
         token("TIMES")
@@ -94,14 +91,17 @@ cat("peek found", nt$id, "\n")
         expression()
       }
     },
-    columnSpecification = function() { formula() },
-    rowSpecification    = function() { formula() },
+    columnSpecification = function() {
+      formula()
+    },
+    rowSpecification    = function() {
+      formula()
+    },
     tableFormula = function()
     {
       columnSpecification()      
       token("TILDE") 
       rowSpecification()
-      token("EOF")
     },
     run       = function(x)
     {
@@ -110,6 +110,7 @@ cat("peek found", nt$id, "\n")
       len   <<- nchar(input)
    
       tableFormula()
+      token("EOF")
     },
     nextToken = function()
     {
@@ -141,9 +142,7 @@ cat("peek found", nt$id, "\n")
         }
 
         pos <<- pos + nchar(match[1,1]) - 1
- 
-cat("name[",match[1,1],"]","\n")
-        
+
         return(Token$new(id="NAME", name=match[1,1]))
     }
   )
@@ -151,19 +150,7 @@ cat("name[",match[1,1],"]","\n")
 
 pr <- Parser$new()
 pr$run("y ~ x")
-cat("----------\n")
+
 pr$run("col1 + col2 ~ drug*age+spiders")
 
 pr$run("I(10^23*rough) ~ spiders + (youth ~ age)")
-
-
-#recursiveDescent <- function(tableFormula)
-#{
-#  if(class(tableFormula) == "formula") { tableFormula <- deparse(formula) }
-#
-#  tableFormula <- str_trim(tableFormula) 
-# 
-#  remains <- specification(tableFormula)
-#  remains <- accept("~", remains)
-#  specification(remains)
-#}
