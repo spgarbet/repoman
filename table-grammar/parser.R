@@ -15,7 +15,7 @@ Token <- R6Class("Token",
     {
       self$id   <- id
       self$name <- name
-cat("Token[",id,",",name,"]\n")
+#cat("Token[",id,",",name,"]\n")
     })
 )
 
@@ -37,7 +37,7 @@ Parser <- R6Class("Parser",
     },
     peek = function()
     {
-cat("peeking at...")
+#cat("peeking at...")
        nt       <- self$nextToken()
        self$pos <- self$pos - nchar(nt$name)
        return(nt)
@@ -127,7 +127,7 @@ cat("peeking at...")
     },
     nextToken = function()
     {
-cat("**position = ",self$pos)
+#cat("**position = ",self$pos)
         # The end?
         if (self$pos == (self$len+1)) {return(Token$new("EOF"))}
         # The parser kept asking for tokens when it shouldn't have
