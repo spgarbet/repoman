@@ -11,9 +11,9 @@ Token <- R6Class("Token",
   public = list(
     id         = "character",
     name       = "character",
-    initialize = function(id, name=NA)
+    initialize = function(id, name="")
     {
-      self$id <- id
+      self$id   <- id
       self$name <- name
 cat("Token[",id,",",name,"]\n")
     })
@@ -39,7 +39,7 @@ Parser <- R6Class("Parser",
     {
 cat("peeking at...")
        nt       <- self$nextToken()
-       self$pos <- self$pos - length(nt$name)
+       self$pos <- self$pos - nchar(nt$name)
        return(nt)
     },
     r_expression = function()
@@ -123,12 +123,13 @@ cat("peeking at...")
       self$len   <- nchar(self$input)
    
       self$tableFormula()
-      #self$expect("EOF")
+      self$expect("EOF")
     },
     nextToken = function()
     {
+cat("**position = ",self$pos)
         # The end?
-        if (self$pos == self$len+1) {return(Token$new("EOF"))}
+        if (self$pos == (self$len+1)) {return(Token$new("EOF"))}
         # The parser kept asking for tokens when it shouldn't have
         if (self$pos > self$len)    { stop("Internal Error. No remaining input") }
 
