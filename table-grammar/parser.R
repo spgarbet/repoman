@@ -1,44 +1,57 @@
 library(stringr)
-
-Token <- setRefClass("Token",
-  fields = list(id   = "character",
-                name = "character")
-)
+library(R6)
 
 rm("pr")
 rm("Parser")
+rm("ASTNode")
+rm("ASTBranch")
+rm("Token")
 
-Parser <- setRefClass("Parser", 
-  fields  = list(input = "character",
-                 pos   = "numeric",
-                 len   = "numeric"),
-  methods = list(
-    token = function(id)
+Token <- R6Class("Token",
+  public = list(
+    id         = "character",
+    name       = "character",
+    initialize = function(id, name=NA)
     {
-      t <- nextToken()
+      self$id <- id
+      self$name <- name
+cat("Token[",id,",",name,"]\n")
+    })
+)
+
+Parser <- R6Class("Parser", 
+  public  = list(
+    input = "character",
+    pos   = "numeric",
+    len   = "numeric",
+    initialize = function() {},
+    expect = function(id)
+    {
+      t <- self$nextToken()
       if(t$id != id)
       {
-        stop(paste("Expecting",id,"before '",substr(input,pos,len),"'"))
+        stop(paste("Expecting",id,"before '",substr(self$input,self$pos,self$len),"'"))
       }
 
       t
     },
     peek = function()
     {
-       nt   <-  nextToken()
-       pos  <<- pos - length(nt$name)
+cat("peeking at...")
+       nt       <- self$nextToken()
+       self$pos <- self$pos - length(nt$name)
        return(nt)
     },
     r_expression = function()
     {
-      match <- str_match(substr(input, pos, len), "^[^\\(\\)]*")
-      pos <<- pos + nchar(match[1,1])
-      c <- substr(input, pos, pos)
+      match <- str_match(substr(self$input, self$pos, self$len), "^[^\\(\\)]*")
+      self$pos <- self$pos + nchar(match[1,1])
+      c <- substr(self$input, self$pos, self$pos)
       if (c == "(" )
       {
-        pos <<- pos + 1
-        r_expression()
-        token(")")
+        self$pos <- self$pos + 1
+        self$r_expression()
+        self$expect(")")
         return(NA)
       }
 
@@ -46,36 +59,36 @@ Parser <- setRefClass("Parser",
     },
     expression = function()
     {
-      nt <- nextToken()
+      nt <- self$nextToken()
       if(nt$id == "LPAREN")
       {
-        tableFormula()
-        token("RPAREN")
+        self$tableFormula()
+        self$expect("RPAREN")
         return(NA)
       }
       if(nt$id != "NAME") # An expression starts with either a name or a '('
       {
-        stop(paste("Unrecognized token",nt$name,"before",substr(input,pos,len)))
+        stop(paste("Unrecognized token",nt$name,"before",substr(self$input,self$pos,self$len)))
       }
       if(nt$name == "I") # R-expression
       {
-        token("LPAREN")
-        r_expression()
-        token("RPAREN") 
+        self$expect("LPAREN")
+        self$r_expression()
+        self$expect("RPAREN") 
         return(NA)
       }
-      pk <- peek() # What follows the name determines next grammar element
+      pk <- self$peek() # What follows the name determines next grammar element
       if(pk$id == "TIMES")
       {
-        token("TIMES")
-        expression()
+        self$expect("TIMES")
+        self$expression()
         return(NA)
       }
       if(pk$id == "LPAREN")
       {
-        token("LPAREN")
-        expression()
-        token("RPAREN")
+        self$expect("LPAREN")
+        self$expression()
+        self$expect("RPAREN")
         return(NA)
       }
       # Else it's just a name
@@ -83,67 +96,67 @@ Parser <- setRefClass("Parser",
     },
     formula = function()
     {
-      expression()
-      t <- peek()
+      self$expression()
+      t <- self$peek()
       if(t$id == "PLUS")
       {
-        token("PLUS")
-        expression()
+        self$expect("PLUS")
+        self$expression()
       }
     },
     columnSpecification = function() {
-      formula()
+      self$formula()
     },
     rowSpecification    = function() {
-      formula()
+      self$formula()
     },
     tableFormula = function()
     {
-      columnSpecification()      
-      token("TILDE") 
-      rowSpecification()
+      self$columnSpecification()      
+      self$expect("TILDE") 
+      self$rowSpecification()
     },
     run       = function(x)
     {
-      input <<- str_replace_all(x, "[[:space:]]", "")
-      pos   <<- 1    
-      len   <<- nchar(input)
+      self$input <- str_replace_all(x, "[[:space:]]", "")
+      self$pos   <- 1    
+      self$len   <- nchar(self$input)
    
-      tableFormula()
-      token("EOF")
+      self$tableFormula()
+      #self$expect("EOF")
     },
     nextToken = function()
     {
         # The end?
-        if (pos == len+1) {return(Token$new(id="EOF"))}
+        if (self$pos == self$len+1) {return(Token$new("EOF"))}
         # The parser kept asking for tokens when it shouldn't have
-        if (pos > len)    { stop("Internal Error. No remaining input") }
+        if (self$pos > self$len)    { stop("Internal Error. No remaining input") }
 
-        x <- substr(input, pos, pos)
-        pos <<- pos + 1
+        x <- substr(self$input, self$pos, self$pos)
+        self$pos <- self$pos + 1
 
         # Look for reserved characters
-        if (x == '*')  {return(Token$new(id="TIMES", name="*") )}
-        if (x == '+')  {return(Token$new(id="PLUS",  name="+") )}
-        if (x == '(')  {return(Token$new(id="LPAREN",name="(") )}
-        if (x == ')')  {return(Token$new(id="RPAREN",name=")") )}
-        if (x == '~')  {return(Token$new(id="TILDE", name="~") )}
+        if (x == '*')  {return(Token$new("TIMES",  "*") )}
+        if (x == '+')  {return(Token$new("PLUS",   "+") )}
+        if (x == '(')  {return(Token$new("LPAREN", "(") )}
+        if (x == ')')  {return(Token$new("RPAREN", ")") )}
+        if (x == '~')  {return(Token$new("TILDE",  "~") )}
  
         # Scan for Name
         #   A syntactically valid name consists of letters, numbers and the dot
         #   or underline characters and starts with a letter or the dot not
         #   followed by a number. 
-        match <- str_match(substr(input,(pos-1),len),
+        match <- str_match(substr(self$input,self$pos-1,self$len),
                            "^([a-zA-Z]|\\.[a-zA-Z_])[a-zA-Z0-9\\._]*")
 
         if(is.na(match[1,1]))
         {
-          stop(paste("Unparseable input starting at",substr(input,(pos-1),(pos+10))))
+          stop(paste("Unparseable input starting at",substr(self$input,self$pos-1,self$pos+10)))
         }
 
-        pos <<- pos + nchar(match[1,1]) - 1
+        self$pos <- self$pos + nchar(match[1,1]) - 1
 
-        return(Token$new(id="NAME", name=match[1,1]))
+        return(Token$new("NAME", match[1,1]))
     }
   )
 )
