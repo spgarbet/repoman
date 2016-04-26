@@ -7,6 +7,45 @@ rm("ASTNode")
 rm("ASTBranch")
 rm("Token")
 
+ASTNode <- R6Class("ASTNode",
+  public = list(
+    symbol = "character",
+    value  = "character",
+    initialize = function(symbol, value) 
+    {
+      self$symbol <- symbol
+      self$value  <- value
+    }
+  )
+)
+
+ASTBranch <- R6Class("ASTBranch",
+  inherit = ASTNode,
+  public = list(
+    left  = "ASTNode",
+    right = "ASTNode",
+    initialize = function(symbol, left, right, value="")
+    {
+      self$symbol <- symbol
+      self$left   <- left
+      self$right  <- right
+      self$value  <- value
+    }
+  )
+)
+
+AST <- R6Class("AST",
+  public = list(
+    row_spec = "ASTBranch",
+    col_spec = "ASTBranch",
+    initialize = function(col_spec, row_spec)
+    {
+      self$row_spec <- row_spec
+      self$col_spec <- col_spec
+    }
+  )
+)
+
 Token <- R6Class("Token",
   public = list(
     id         = "character",
@@ -45,6 +84,7 @@ Parser <- R6Class("Parser",
     r_expression = function()
     {
       match <- str_match(substr(self$input, self$pos, self$len), "^[^\\(\\)]*")
+      starting <- self$pos
       self$pos <- self$pos + nchar(match[1,1])
       c <- substr(self$input, self$pos, self$pos)
       if (c == "(" )
@@ -55,16 +95,16 @@ Parser <- R6Class("Parser",
         return(NA)
       }
 
-      return(NA)
+      return(ASTNode$new("r_expr", substr(self$input, starting, self$pos - 1)))
     },
     expression = function()
     {
       nt <- self$nextToken()
       if(nt$id == "LPAREN")
       {
-        self$tableFormula()
+        tf <- self$tableFormula()
         self$expect("RPAREN")
-        return(NA)
+        return(tf)
       }
       if(nt$id != "NAME") # An expression starts with either a name or a '('
       {
@@ -73,36 +113,39 @@ Parser <- R6Class("Parser",
       if(nt$name == "I") # R-expression
       {
         self$expect("LPAREN")
-        self$r_expression()
+        r_expr <- self$r_expression()
         self$expect("RPAREN") 
-        return(NA)
+        return(r_expr)
       }
       pk <- self$peek() # What follows the name determines next grammar element
       if(pk$id == "TIMES")
       {
         self$expect("TIMES")
-        self$expression()
-        return(NA)
+        expr <- self$expression()
+        return(ASTBranch$new("permute", ASTNode$new("name", nt$name), expr))
       }
       if(pk$id == "LPAREN")
       {
         self$expect("LPAREN")
-        self$expression()
+        expr <- self$expression()
         self$expect("RPAREN")
-        return(NA)
+        return(ASTBranch$new("transform", expr, NA, nt$name))
       }
       # Else it's just a name
-      return(NA)
+      return(ASTNode$new("name",nt$name))
     },
     formula = function()
     {
-      self$expression()
+      l_expr  <- self$expression()
+      r_expr  <- NA
       t <- self$peek()
       if(t$id == "PLUS")
       {
         self$expect("PLUS")
-        self$expression()
+        r_expr <- self$expression()
       }
+
+      return(ASTBranch$new("expression", l_expr, r_expr))      
     },
     columnSpecification = function() {
       self$formula()
@@ -112,9 +155,11 @@ Parser <- R6Class("Parser",
     },
     tableFormula = function()
     {
-      self$columnSpecification()      
+      cs <- self$columnSpecification()      
       self$expect("TILDE") 
-      self$rowSpecification()
+      rs <- self$rowSpecification()
+      
+      return(AST$new(cs, rs))
     },
     run       = function(x)
     {
@@ -122,8 +167,9 @@ Parser <- R6Class("Parser",
       self$pos   <- 1    
       self$len   <- nchar(self$input)
    
-      self$tableFormula()
+      tf <- self$tableFormula()
       self$expect("EOF")
+      return(tf)
     },
     nextToken = function()
     {
@@ -165,6 +211,6 @@ Parser <- R6Class("Parser",
 pr <- Parser$new()
 pr$run("y ~ x")
 
-pr$run("col1 + col2 ~ drug*age+spiders")
+ast <- pr$run("col1 + col2 ~ drug*age+spiders")
 
 pr$run("I(10^23*rough) ~ spiders + (youth ~ age)")
