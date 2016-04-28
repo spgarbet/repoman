@@ -34,18 +34,6 @@ ASTBranch <- R6Class("ASTBranch",
   )
 )
 
-AST <- R6Class("AST",
-  public = list(
-    row_spec = "ASTBranch",
-    col_spec = "ASTBranch",
-    initialize = function(col_spec, row_spec)
-    {
-      self$row_spec <- row_spec
-      self$col_spec <- col_spec
-    }
-  )
-)
-
 Token <- R6Class("Token",
   public = list(
     id         = "character",
@@ -86,16 +74,18 @@ Parser <- R6Class("Parser",
       match <- str_match(substr(self$input, self$pos, self$len), "^[^\\(\\)]*")
       starting <- self$pos
       self$pos <- self$pos + nchar(match[1,1])
+      # Didn't call tokenizer for peek, due to different grammar of R expressions
       c <- substr(self$input, self$pos, self$pos)
       if (c == "(" )
       {
-        self$pos <- self$pos + 1
-        self$r_expression()
-        self$expect(")")
-        return(NA)
+        self$pos <- self$pos + 1 # Eat that character
+        rexpr <- self$r_expression()
+        self$expect("RPAREN")
+        rexpr <- self$r_expression() # Continue the r_expr
+        return(ASTNode$new("r_expr", substr(self$input, starting, self$pos-1)))
       }
 
-      return(ASTNode$new("r_expr", substr(self$input, starting, self$pos - 1)))
+      return(ASTNode$new("r_expr", substr(self$input, starting, self$pos-1)))
     },
     expression = function()
     {
@@ -142,10 +132,10 @@ Parser <- R6Class("Parser",
       if(t$id == "PLUS")
       {
         self$expect("PLUS")
-        r_expr <- self$expression()
+        r_expr <- self$formula()
       }
 
-      return(ASTBranch$new("expression", l_expr, r_expr))      
+      return(ASTBranch$new("plus", l_expr, r_expr))      
     },
     columnSpecification = function() {
       self$formula()
@@ -159,7 +149,7 @@ Parser <- R6Class("Parser",
       self$expect("TILDE") 
       rs <- self$rowSpecification()
       
-      return(AST$new(cs, rs))
+      return(ASTBranch$new("table", cs, rs))
     },
     run       = function(x)
     {
@@ -173,7 +163,6 @@ Parser <- R6Class("Parser",
     },
     nextToken = function()
     {
-#cat("**position = ",self$pos)
         # The end?
         if (self$pos == (self$len+1)) {return(Token$new("EOF"))}
         # The parser kept asking for tokens when it shouldn't have
@@ -213,4 +202,4 @@ pr$run("y ~ x")
 
 ast <- pr$run("col1 + col2 ~ drug*age+spiders")
 
-pr$run("I(10^23*rough) ~ spiders + (youth ~ age)")
+ast2 <- pr$run("I(10^23*(rough+2)+3) ~ spiders + (youth ~ age)+more")
