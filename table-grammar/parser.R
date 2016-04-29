@@ -51,13 +51,13 @@ Parser <- R6Class("Parser",
     input = "character",
     pos   = "numeric",
     len   = "numeric",
-    initialize = function() {},
+    initialize = function(input=NA) {self$input <- input},
     expect = function(id)
     {
       t <- self$nextToken()
       if(t$id != id)
       {
-        stop(paste("Expecting",id,"before '",substr(self$input,self$pos,self$len),"'"))
+        stop(paste("Expecting",id,"before '",substr(self$input,self$pos,self$len),"'",sep=""))
       }
 
       t
@@ -127,15 +127,14 @@ Parser <- R6Class("Parser",
     formula = function()
     {
       l_expr  <- self$expression()
-      r_expr  <- NA
-      t <- self$peek()
-      if(t$id == "PLUS")
+      if(self$peek()$id == "PLUS")
       {
         self$expect("PLUS")
         r_expr <- self$formula()
+        return(ASTBranch$new("plus", l_expr, r_expr))
       }
 
-      return(ASTBranch$new("plus", l_expr, r_expr))      
+      return(l_expr)   
     },
     columnSpecification = function() {
       self$formula()
@@ -187,7 +186,7 @@ Parser <- R6Class("Parser",
 
         if(is.na(match[1,1]))
         {
-          stop(paste("Unparseable input starting at",substr(self$input,self$pos-1,self$pos+10)))
+          stop(paste("Unparseable input starting at",substr(self$input,self$pos-1,self$pos+10),sep=""))
         }
 
         self$pos <- self$pos + nchar(match[1,1]) - 1
