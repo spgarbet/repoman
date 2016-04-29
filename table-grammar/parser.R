@@ -205,9 +205,59 @@ Parser <- R6Class("Parser",
   )
 )
 
-pr <- Parser$new()
-pr$run("y ~ x")
+test.parserExpr <- function() 
+{
+   pr  <- Parser$new()
+   ast <- pr$run("col1 + col2 + col3 ~ drug*age+spiders")
+   
+     ###############################################################
+    ##
+   ##  Abstract Syntax Tree (AST) for 
+   ##   col1 + col2 + col3 ~ drug*age+spiders
+   ## 
+   ##                    table
+   ##                     / \
+   ##                 ___/   \___
+   ##                /           \
+   ##               /             \
+   ##              +               +
+   ##             / \             / \
+   ##            /   \           /   \
+   ##          col1   +         *   spiders
+   ##                / \       / \
+   ##               /   \     /   \
+   ##             col2 col3 drug  age
+   ##
+   ##################################################################
+   
+   checkEquals(ast$symbol, "table")
+   
+   checkEquals(ast$left$symbol, "plus")
+   
+   checkEquals(ast$left$left$symbol, "name")
+   checkEquals(ast$left$left$value,  "col1")
 
-ast <- pr$run("col1 + col2 ~ drug*age+spiders")
+   checkEquals(ast$left$right$symbol, "plus")
+   
+   checkEquals(ast$left$right$left$symbol, "name")
+   checkEquals(ast$left$right$left$value,  "col2")
 
-ast2 <- pr$run("I(10^23*(rough+2)+3) ~ spiders + (youth ~ age)+more")
+   checkEquals(ast$left$right$right$symbol, "name")
+   checkEquals(ast$left$right$right$value,  "col3")
+   
+   checkEquals(ast$right$symbol, "plus")
+   
+   checkEquals(ast$right$left$symbol, "permute")
+   
+   checkEquals(ast$right$left$left$symbol, "name")
+   checkEquals(ast$right$left$left$value,  "drug")
+   
+   checkEquals(ast$right$left$right$symbol, "name")
+   checkEquals(ast$right$left$right$value,  "age")
+   
+   checkEquals(ast$right$right$symbol, "name")
+   checkEquals(ast$right$right$value,  "spiders")
+}
+
+
+#ast2 <- pr$run("I(10^23*(rough+2)+3) ~ spiders + (youth ~ age)+more")
