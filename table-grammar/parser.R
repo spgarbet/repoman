@@ -1,12 +1,13 @@
 library(stringr)
 library(R6)
+library(RUnit)
 
-rm("pr")
-rm("Parser")
-rm("ASTNode")
-rm("ASTBranch")
-rm("Token")
 
+# Clean environment during development
+# FIXME: Delete
+rm(list=ls())
+
+# A terminal node in the Abstract Syntax Tree
 ASTNode <- R6Class("ASTNode",
   public = list(
     symbol = "character",
@@ -19,6 +20,7 @@ ASTNode <- R6Class("ASTNode",
   )
 )
 
+# A branch node in the Abstract Syntax Tree, may contain a value
 ASTBranch <- R6Class("ASTBranch",
   inherit = ASTNode,
   public = list(
@@ -34,6 +36,9 @@ ASTBranch <- R6Class("ASTBranch",
   )
 )
 
+# A token in the grammar
+# Composed of an id (e.g. "PLUS", "LPAREN")
+# and a name, the actual contents of it, in case of long tokens
 Token <- R6Class("Token",
   public = list(
     id         = "character",
@@ -46,6 +51,7 @@ Token <- R6Class("Token",
     })
 )
 
+# The parser for the table formulas
 Parser <- R6Class("Parser", 
   public  = list(
     input = "character",
