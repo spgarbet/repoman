@@ -35,6 +35,17 @@ formula = "drug ~ bili + albumin + stage + protime + sex + age + spiders"
 
 functionDefaults = list(factor=pearson, numeric = kruskal, logical=pearson)
 
+summaryTG <- function(formula, data, funcs)
+
+table <- summaryTG(formula = drug ~ bili + albumin + stage + protime + sex + age + spiders, 
+                   data    = pbc,
+                   funcs   = functionDefaults)
+
+summary(table)
+html5(table)
+latex(table)
+              
+
 _Note: typing in R is impure, and a means to determine type will be needed._
 
 A function applied to a variable in the data may result in the construction of multiple columns. In the Hmisc assumptions, both pearson and kruskal would return
