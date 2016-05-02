@@ -4,14 +4,46 @@ library(Hmisc)
 
 transformDefaults = list()#factor=pearson, numeric = kruskal, logical=pearson)
 
+labels <- function(elements, data)
+{
+  rows <- sapply(elements[[2]],
+    FUN=function(x) 
+    {
+print(x)
+      l <- x
+      try({
+        l2 <- label(data[x])
+        if(nchar(l2)>0) {l<-l2}
+      })
+      l
+    }
+  )
+  
+  cols <- sapply(elements[[1]],
+    FUN=function(x)
+    {
+      l <- x
+      try({
+        l2 <- label(data[x])
+        if(nchar(l2)>0) {l<-l2}
+      })
+      l
+    }
+  )
+  
+  list(c("",rows), cols)
+}
 
 transformToTable <- function(ast, data, transforms)
 {
-  el <- ast$elements()
+  lbl <- labels(ast$elements(), data)
+
+  height <- length(lbl[[1]])
+  width  <- length(lbl[[2]])
   
-  cells <- matrix(rep(NA, length(el[[1]])*length(el[[2]])),
-                  nrow=length(el[[2]]),
-                  dimnames=list(el[[2]],el[[1]]))
+  cells <- matrix(rep(NA, height*width),
+                  nrow=height,
+                  dimnames=lbl)
   
   structure(list(ast = ast, cells=cells), class="table")
 }
@@ -25,7 +57,7 @@ summaryTG <- function(formula, data, transforms=transformDefaults)
 
 summary.table <- function(object)
 {
-  print(object)
+  print(object$cells)
 }
 
 getHdata(pbc)
