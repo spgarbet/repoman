@@ -10,8 +10,8 @@ transformToTable <- function(ast, data, transforms)
   el <- ast$elements()
   
   cells <- matrix(rep(NA, length(el[[1]])*length(el[[2]])),
-                  nrow=length(el[[1]]),
-                  dimnames=el)
+                  nrow=length(el[[2]]),
+                  dimnames=list(el[[2]],el[[1]]))
   
   structure(list(ast = ast, cells=cells), class="table")
 }
@@ -25,7 +25,7 @@ summaryTG <- function(formula, data, transforms=transformDefaults)
 
 summary.table <- function(object)
 {
-  "YO!"
+  print(object)
 }
 
 getHdata(pbc)
