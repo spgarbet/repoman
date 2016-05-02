@@ -191,6 +191,11 @@ Parser <- R6Class("Parser",
     },
     run       = function(x)
     {
+      if(class(x) == "formula")
+      {
+        y <- as.character(x)
+        x <- paste(x[2], x[1], x[3])
+      }
       self$input <- str_replace_all(x, "[[:space:]]", "")
       self$pos   <- 1    
       self$len   <- nchar(self$input)

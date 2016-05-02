@@ -1,5 +1,7 @@
 source("tableGrammar/parser.R")
 
+library(Hmisc)
+
 transformDefaults = list()#factor=pearson, numeric = kruskal, logical=pearson)
 
 transformToTable <- function(ast, data, transforms)
