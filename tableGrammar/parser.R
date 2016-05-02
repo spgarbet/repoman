@@ -52,7 +52,9 @@ Parser <- R6Class("Parser",
     input = "character",
     pos   = "numeric",
     len   = "numeric",
-    initialize = function(input=NA) {self$input <- input},
+    initialize = function()
+    {
+    },
     # Expect is a function that requires the next element in the grammar to be the given id
     expect = function(id)
     {
