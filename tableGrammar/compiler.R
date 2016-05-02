@@ -4,11 +4,15 @@ library(Hmisc)
 
 transformDefaults = list()#factor=pearson, numeric = kruskal, logical=pearson)
 
+
+
 transformToTable <- function(ast, data, transforms)
 {
-  tbl <- structure(list(ast = ast), class="table")
+  dd <- ast$dim()
   
-  tbl
+  cells <- matrix(rep(NA, dd[1]*dd[2]), nrow=dd[1], ncol=dd[2])
+  
+  structure(list(ast = ast, cells=cells), class="table")
 }
 
 summaryTG <- function(formula, data, transforms=transformDefaults)

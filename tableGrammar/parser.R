@@ -11,7 +11,8 @@ ASTNode <- R6Class("ASTNode",
     {
       self$symbol <- symbol
       self$value  <- value
-    }
+    },
+    elements = function() {return(1)}
   )
 )
 
@@ -27,6 +28,36 @@ ASTBranch <- R6Class("ASTBranch",
       self$left   <- left
       self$right  <- right
       self$value  <- value
+    },
+    elements = function()
+    {
+      if(self$symbol == "plus") 
+      {
+        return(self$left$elements() + self$right$elements())
+      }
+      
+      return(1) # It's something else, so just count node as 1.
+    }
+  )
+)
+
+# A branch node in the Abstract Syntax Tree, may contain a value
+ASTTable <- R6Class("ASTTable",
+  inherit = ASTBranch,
+  public = list(
+    left  = "ASTNode",
+    right = "ASTNode",
+    initialize = function(left, right)
+    {
+      self$symbol <- "table"
+      self$left   <- left
+      self$right  <- right
+      self$value  <- ""
+    },
+    elements = function() {2}, # Left and right branches
+    dim = function()
+    {
+      c(self$left$elements(), self$right$elements())
     }
   )
 )
@@ -187,7 +218,7 @@ Parser <- R6Class("Parser",
       self$expect("TILDE") 
       rs <- self$rowSpecification()
       
-      return(ASTBranch$new("table", cs, rs))
+      return(ASTTable$new(cs, rs))
     },
     run       = function(x)
     {
