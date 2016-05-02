@@ -12,7 +12,7 @@ ASTNode <- R6Class("ASTNode",
       self$symbol <- symbol
       self$value  <- value
     },
-    elements = function() {return(1)}
+    elements = function() {return(self$value)}
   )
 )
 
@@ -33,11 +33,12 @@ ASTBranch <- R6Class("ASTBranch",
     {
       if(self$symbol == "plus") 
       {
-        return(self$left$elements() + self$right$elements())
+        return(c(self$left$elements(), self$right$elements()))
       }
       
-      return(1) # It's something else, so just count node as 1.
-    }
+      return(self$name()) 
+    },
+    name = function() {return (self$value)} # What to call other stuff?
   )
 )
 
@@ -54,10 +55,9 @@ ASTTable <- R6Class("ASTTable",
       self$right  <- right
       self$value  <- ""
     },
-    elements = function() {2}, # Left and right branches
-    dim = function()
+    elements = function()
     {
-      c(self$left$elements(), self$right$elements())
+      list(self$left$elements(), self$right$elements())
     }
   )
 )

@@ -5,12 +5,13 @@ library(Hmisc)
 transformDefaults = list()#factor=pearson, numeric = kruskal, logical=pearson)
 
 
-
 transformToTable <- function(ast, data, transforms)
 {
-  dd <- ast$dim()
+  el <- ast$elements()
   
-  cells <- matrix(rep(NA, dd[1]*dd[2]), nrow=dd[1], ncol=dd[2])
+  cells <- matrix(rep(NA, length(el[[1]])*length(el[[2]])),
+                  nrow=length(el[[1]]),
+                  dimnames=el)
   
   structure(list(ast = ast, cells=cells), class="table")
 }
@@ -28,9 +29,9 @@ summary.table <- function(object)
 }
 
 getHdata(pbc)
-#table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
-table <- summaryTG(drug ~ bili, pbc)
-
+table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+#table <- summaryTG(drug ~ bili, pbc)
+table$cells
 summary(table)
 #index(table)
 #html5(table)
