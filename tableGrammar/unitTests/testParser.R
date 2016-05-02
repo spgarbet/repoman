@@ -1,6 +1,6 @@
 library(RUnit)
 
-source("../parser.R")
+source("tableGrammar/parser.R")
 
 test.parserExpr <- function() 
 {
