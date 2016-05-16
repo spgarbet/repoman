@@ -9,7 +9,6 @@ labels <- function(elements, data)
   rows <- sapply(elements[[2]],
     FUN=function(x) 
     {
-print(x)
       l <- x
       try({
         l2 <- label(data[x])
@@ -41,9 +40,9 @@ transformToTable <- function(ast, data, transforms)
   height <- length(lbl[[1]])
   width  <- length(lbl[[2]])
   
-  cells <- matrix(rep(NA, height*width),
-                  nrow=height,
-                  dimnames=lbl)
+  cells <- array(rep(NA, height*width),
+                 c(height, width),
+                 dimnames=lbl)
   
   structure(list(ast = ast, cells=cells), class="table")
 }
