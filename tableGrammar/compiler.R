@@ -1,8 +1,10 @@
 source("tableGrammar/parser.R")
+source("tableGrammar/S3-Cell.R")
+
 
 library(Hmisc)
 
-transformDefaults = list()#factor=pearson, numeric = kruskal, logical=pearson)
+transformDefaults = list()#numeric = kruskal)#, factor=pearson, logical=pearson)
 
 labels <- function(elements, data)
 {
@@ -35,16 +37,40 @@ labels <- function(elements, data)
 
 transformToTable <- function(ast, data, transforms)
 {
-  lbl <- labels(ast$elements(), data)
+  elements <- ast$elements()
+  
+  lbl <- labels(elements, data)
 
-  height <- length(lbl[[1]])
+  height <- length(lbl[[1]]) -1
   width  <- length(lbl[[2]])
   
-  cells <- array(rep(NA, height*width),
-                 c(height, width),
-                 dimnames=lbl)
+  tbl <- table(height, width)
+
+  sapply(1:width, FUN=function(col_idx) {
+    column <- elements[[1]][col_idx]
+    categories <- levels(data[,column])
+    
+    sapply(1:height, FUN=function(row_idx) {
+      # ASSUMPTION, column is categorical, i.e. factor -- need to relax this assumption
+
+      row    <- elements[[2]][row_idx]
+      
+      inner_tbl <- table(1, length(categories) + 3) # name + n + no. categories + test statistic
+
+
+      inner_tbl[[1]][[1]] <- label_cell(lbl[[1]][row_idx+1]) # Need to split out units...
+      
+      inner_tbl[[1]][[2]] <- label_cell(as.character(sum(!is.na(data[,row]))))
+      
+      sapply(1:length(categories), FUN=function(category) {
+        inner_tbl[[1]][[category+2]] <- quantile_cell(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
+      })
+      
+      tbl[[row_idx]][[col_idx]] <- inner_tbl
+    })
+  })
   
-  structure(list(ast = ast, cells=cells), class="table")
+  tbl
 }
 
 summaryTG <- function(formula, data, transforms=transformDefaults)
@@ -60,10 +86,13 @@ summary.table <- function(object)
 }
 
 getHdata(pbc)
-table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+#table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
-table$cells
-summary(table)
+table <- summaryTG(drug ~ bili + albumin + protime + age, pbc)
+
+table
+
+#summary(table)
 #index(table)
 #html5(table)
 #latex(table)
