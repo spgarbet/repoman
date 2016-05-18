@@ -1,0 +1,46 @@
+
+body {
+	font-family: "Computer Modern Serif", serif;
+}
+
+#figure  {  margin-left:  auto;
+			margin-right: auto;
+         }
+
+#caption { text-align:   center;
+	       margin-left:  auto;
+	       margin-right: auto;
+	       padding: 1.5em 0em 1.5em 0em;
+	     }
+
+#figbody {
+		   text-align:   center;
+	       margin-left:  auto;
+	       margin-right: auto;
+	       border-style: double none solid none;
+	       border-width: 3px 0 1px 0;
+	       width:        80%;
+         }
+
+#figbody td {
+				padding: 0.2em 0.5em 0.2em 0.5em;
+             }
+
+#summaryM thead { border-bottom-style: solid;
+				  border-bottom-width: 1px; 
+                }
+
+#subheader {
+		font-size: small;
+}
+
+.quantile {
+	font-size: smaller;
+}
+
+.quantile b {
+	font-size: larger;
+}
+
+sub { font-size: x-small; }
+sup { font-size: x-small; }
