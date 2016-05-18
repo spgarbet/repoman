@@ -12,7 +12,7 @@
 	<div id="figure">
 		<div id="caption">Table 9: Descriptive Statistics by drug</div>
 		<div id="figbody">
-			<table id="summaryM">
+			<table id="summaryM" cellspacing="0">
 				<thead>
 					<tr>
 						<td></td>
@@ -33,7 +33,7 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td class="label">Serum Bilirubin (mg/dl)</td>
+						<td class="label"><div class="variable">Serum Bilirubin</div><div class="units">mg/dl</div></td>
 					    <td>418</td>
 					    <td class="quantile">0.725 <b>1.300</b> 3.600</td>
 					    <td class="quantile">0.800 <b>1.400</b> 3.200</td>
@@ -41,12 +41,76 @@
 					    <td class="statistic"><em>F</em><sub>2,415</sub> = 0.03, <em>P</em> = 0.972<sup>1</sup></td>
 					</tr>
 					<tr>
-						<td class="label">Albumin (mg/dl)</td>
+						<td class="label"><div class="variable">Albumin</div><div class="units">mg/dl</div></td>
 						<td>418</td>
 					    <td class="quantile">3.34 <b>3.54</b> 3.78</td>
 					    <td class="quantile">3.21 <b>3.56</b> 3.83</td>
 					    <td class="quantile">3.12 <b>3.47</b> 3.72</td>
 					    <td class="statistic"><em>F</em><sub>2,415</sub> = 2.13, <em>P</em> = 0.12<sup>1</sup></td>
+					</tr>
+					<tr>
+						<td class="label"<div class="variable">Histologic Stage Ludwig Criteria : 1</div></td>
+						<td>412</td>
+						<td class="percent">3<div class="align">%</div> <sup>4</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">8<div class="align">%</div> <sup>12</sup>&frasl;<sub>158</sub></td>
+						<td class="percent">5<div class="align">%</div> <sup>5</sup>&frasl;<sub>100</sub></td>
+						<td><span class="nobr">&chi;<span class="supsub">2<br/>6</span></span> = 5.33, <em>P</em> = 0.502<sup>2</sup></td>
+					</tr>
+					<tr>
+						<td class="label"><div class="variable">&nbsp;&nbsp;2</div></td>
+						<td></td>
+						<td class="percent">21<div class="align">%</div> <sup>32</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">22<div class="align">%</div> <sup>35</sup>&frasl;<sub>158</sub></td>
+						<td class="percent">25<div class="align">%</div> <sup>25</sup>&frasl;<sub>100</sub></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td class="label"><div class="variable">&nbsp;&nbsp;3</div></td>
+						<td></td>
+						<td class="percent">42<div class="align">%</div> <sup>64</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">35<div class="align">%</div> <sup>56</sup>&frasl;<sub>158</sub></td>
+						<td class="percent">35<div class="align">%</div> <sup>35</sup>&frasl;<sub>100</sub></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td class="label"><div class="variable">&nbsp;&nbsp;4</div></td>
+						<td></td>
+						<td class="percent">35<div class="align">%</div> <sup>54</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">35<div class="align">%</div> <sup>55</sup>&frasl;<sub>158</sub></td>
+						<td class="percent">35<div class="align">%</div> <sup>35</sup>&frasl;<sub>100</sub></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td class="label"><div class="variable">Prothrombin Time</div><div class="units">sec.</div></td>
+					    <td>416</td>
+					    <td class="quantile">10.0 <b>10.6</b> 11.4</td>
+					    <td class="quantile">10.0 <b>10.6</b> 11.0</td>
+					    <td class="quantile">10.1 <b>10.6</b> 11.0</td>
+					    <td class="statistic"><em>F</em><sub>2,413</sub> = 0.23, <em>P</em> = 0.795<sup>1</sup></td>
+					</tr>
+					<tr>
+						<td class="label"<div class="variable">sex : female</div></td>
+						<td>418</td>
+						<td class="percent">90<div class="align">%</div> <sup>139</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">87<div class="align">%</div> <sup>137</sup>&frasl;<sub>158</sub></td>
+						<td class="percent">92<div class="align">%</div> <sup>98</sup>&frasl;<sub>100</sub></td>
+						<td><span class="nobr">&chi;<span class="supsub">2<br/>2</span></span> = 2.38, <em>P</em> = 0.304<sup>2</sup></td>
+					</tr>
+					<tr>
+						<td class="label"><div class="variable">Age</div></td>
+					    <td>418</td>
+					    <td class="quantile">41.4 <b>48.1</b> 55.8</td>
+					    <td class="quantile">43.0 <b>51.9</b> 58.9</td>
+					    <td class="quantile">46.0 <b>53.0</b> 61.0</td>
+					    <td class="statistic"><em>F</em><sub>2,415</sub> = 6.1, <em>P</em> = 0.002<sup>1</sup></td>
+					</tr>
+					<tr>
+						<td class="label"<div class="variable">spiders</div></td>
+						<td>312</td>
+						<td class="percent">29<div class="align">%</div> <sup>45</sup>&frasl;<sub>154</sub></td>
+						<td class="percent">28<div class="align">%</div> <sup>45</sup>&frasl;<sub>158</sub></td>
+						<td></td>
+						<td><span class="nobr">&chi;<span class="supsub">2<br/>1</span></span> = 0.02, <em>P</em> = 0.885<sup>2</sup></td>
 					</tr>
 				</tbody>
 			</table>
