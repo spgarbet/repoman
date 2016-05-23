@@ -54,7 +54,7 @@ transformToTable <- function(ast, data, transforms)
       # ASSUMPTION, column is categorical, i.e. factor -- need to relax this assumption
 
       row    <- elements[[2]][row_idx]
-      
+
       inner_tbl <- table(1, length(categories) + 3) # name + n + no. categories + test statistic
 
 
@@ -64,6 +64,7 @@ transformToTable <- function(ast, data, transforms)
       
       sapply(1:length(categories), FUN=function(category) {
         inner_tbl[[1]][[category+2]] <- quantile_cell(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
+        print(inner_tbl[[1]][[category+2]])
       })
       
       tbl[[row_idx]][[col_idx]] <- inner_tbl
@@ -85,6 +86,7 @@ summary.table <- function(object)
   print(object$cells)
 }
 
+library(Hmisc)
 getHdata(pbc)
 #table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
