@@ -35,7 +35,7 @@ labels <- function(elements, data)
   list(c("",rows), cols)
 }
 
-transformToTable <- function(ast, data, transforms)
+tg_create_table <- function(ast, data, transforms)
 {
   elements <- ast$elements()
   
@@ -44,7 +44,7 @@ transformToTable <- function(ast, data, transforms)
   height <- length(lbl[[1]]) -1
   width  <- length(lbl[[2]])
   
-  tbl <- table(height, width)
+  tbl <- tg_table(height, width)
 
   sapply(1:width, FUN=function(col_idx) {
     column <- elements[[1]][col_idx]
@@ -55,15 +55,15 @@ transformToTable <- function(ast, data, transforms)
 
       row    <- elements[[2]][row_idx]
       
-      inner_tbl <- table(1, length(categories) + 3) # name + n + no. categories + test statistic
+      inner_tbl <- tg_table(1, length(categories) + 3) # name + n + no. categories + test statistic
 
 
-      inner_tbl[[1]][[1]] <- label_cell(lbl[[1]][row_idx+1]) # Need to split out units...
+      inner_tbl[[1]][[1]] <- tg_cell(lbl[[1]][row_idx+1]) # Need to split out units...
       
-      inner_tbl[[1]][[2]] <- label_cell(as.character(sum(!is.na(data[,row]))))
+      inner_tbl[[1]][[2]] <- tg_cell(as.character(sum(!is.na(data[,row]))))
       
       sapply(1:length(categories), FUN=function(category) {
-        inner_tbl[[1]][[category+2]] <- quantile_cell(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
+        inner_tbl[[1]][[category+2]] <- tg_quantile(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
       })
       
       tbl[[row_idx]][[col_idx]] <- inner_tbl
@@ -73,11 +73,11 @@ transformToTable <- function(ast, data, transforms)
   tbl
 }
 
-summaryTG <- function(formula, data, transforms=transformDefaults)
+tg_summary <- function(formula, data, transforms=transformDefaults)
 {
   ast <- Parser$new()$run(formula)
   
-  transformToTable(ast, data, transforms)
+  tg_create_table(ast, data, transforms)
 }
 
 summary.table <- function(object)
@@ -88,14 +88,12 @@ summary.table <- function(object)
 getHdata(pbc)
 #table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
-table <- summaryTG(drug ~ bili + albumin + protime + age, pbc)
+test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-table
+test_table
 
 #summary(table)
 #index(table)
 #html5(table)
 #latex(table)
-
-
 

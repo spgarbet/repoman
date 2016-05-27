@@ -1,15 +1,15 @@
 
 getHdata(pbc)
 
-cell <- function(contents=NA)
+tg_cell <- function(contents=NA)
 {
   if(inherits(contents,"list"))
   {
-    structure(contents, class="cell")
+    structure(contents, class="tg_cell")
   }
   else if(is.na(contents))
   {
-    structure(list(), class="cell")
+    structure(list(), class="tg_cell")
   } 
   else
   {
@@ -17,43 +17,43 @@ cell <- function(contents=NA)
   }
 }
 
-table <- function(rows, cols)
+tg_table <- function(rows, cols)
 {
   nt <- sapply(1:rows, FUN=function(x) list(sapply(1:cols, FUN=function(x) cell())))
   
-  structure(cell(nt), class="table")
+  structure(cell(nt), class="tg_table")
 }
 
-label_cell <- function(text, units=NA)
+tg_label <- function(text, units=NA)
 {
-  structure(cell(list(label=as.character(text), units=as.character(units))), class = "cell_label")
+  structure(cell(list(label=as.character(text), units=as.character(units))), class = "tg_label")
 }
 
-quantile_cell <- function(quantiles)
+tg_quantile <- function(quantiles)
 {
-  structure(cell(list(q25=quantiles[2], q50=quantiles[3], q75=quantiles[4])), class="cell_quantile")
+  structure(cell(list(q25=quantiles[2], q50=quantiles[3], q75=quantiles[4])), class="tg_quantile")
 }
 
-fstat_cell <- function(f, n1, n2, p)
+tg_fstat <- function(f, n1, n2, p)
 {
-  structure(cell(list(f=f, n1=n1, n2=n2, p=p)), class="cell_fstat")
+  structure(cell(list(f=f, n1=n1, n2=n2, p=p)), class="tg_fstat")
 }
 
-fraction_cell <- function(numerator, denominator)
+tg_fraction <- function(numerator, denominator)
 {
-  structure(cell(list(numerator=numerator, denominator=denominator)), class="cell_fraction")
+  structure(cell(list(numerator=numerator, denominator=denominator)), class="tg_fraction")
 }
 
-chi2_cell <- function(chi2, n, p)
+tg_chi2 <- function(chi2, n, p)
 {
-  structure(cell(list(chi2=chi2, n=n, p=p)), class="cell_chi2")
+  structure(cell(list(chi2=chi2, n=n, p=p)), class="tg_chi2")
 }
 
 # Now test with serum bili row
-#serum_bili <- table(1, 6)
-#serum_bili[[1]][[1]] <- label_cell("Serum Bilirubin", "mg/dl")
-#serum_bili[[1]][[2]] <- label_cell("418")
-#serum_bili[[1]][[3]] <- quantile_cell(quantile(pbc$bili[pbc$drug == "D-penicillamine"]))
-#serum_bili[[1]][[4]] <- quantile_cell(quantile(pbc$bili[pbc$drug == "placebo"]))
-#serum_bili[[1]][[5]] <- quantile_cell(quantile(pbc$bili[pbc$drug == "not randomized"]))
-#serum_bili[[1]][[6]] <- fstat_cell(0.03, 2, 415, 0.972)
+serum_bili <- tg_table(1, 6)
+serum_bili[[1]][[1]] <- tg_label("Serum Bilirubin", "mg/dl")
+serum_bili[[1]][[2]] <- tg_label("418")
+serum_bili[[1]][[3]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "D-penicillamine"]))
+serum_bili[[1]][[4]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "placebo"]))
+serum_bili[[1]][[5]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "not randomized"]))
+serum_bili[[1]][[6]] <- tg_fstat(0.03, 2, 415, 0.972)
