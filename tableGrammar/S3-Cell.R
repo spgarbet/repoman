@@ -57,3 +57,4 @@ serum_bili[[1]][[3]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "D-penicillami
 serum_bili[[1]][[4]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "placebo"]))
 serum_bili[[1]][[5]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "not randomized"]))
 serum_bili[[1]][[6]] <- tg_fstat(0.03, 2, 415, 0.972)
+

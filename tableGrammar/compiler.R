@@ -54,9 +54,8 @@ tg_create_table <- function(ast, data, transforms)
       # ASSUMPTION, column is categorical, i.e. factor -- need to relax this assumption
 
       row    <- elements[[2]][row_idx]
-      
-      inner_tbl <- tg_table(1, length(categories) + 3) # name + n + no. categories + test statistic
 
+      inner_tbl <- tg_table(1, length(categories) + 3) # name + n + no. categories + test statistic
 
       inner_tbl[[1]][[1]] <- tg_cell(lbl[[1]][row_idx+1]) # Need to split out units...
       
@@ -85,6 +84,7 @@ summary.table <- function(object)
   print(object$cells)
 }
 
+library(Hmisc)
 getHdata(pbc)
 #table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
