@@ -57,15 +57,15 @@ tg_create_table <- function(ast, data, transforms)
 
       inner_tbl <- tg_table(1, length(categories) + 3) # name + n + no. categories + test statistic
 
-      inner_tbl[[1]][[1]] <- tg_cell(lbl[[1]][row_idx+1]) # Need to split out units...
+      inner_tbl[[1]][[1]] <- tg_label(lbl[[1]][row_idx+1]) # Need to split out units...
       
-      inner_tbl[[1]][[2]] <- tg_cell(as.character(sum(!is.na(data[,row]))))
+      inner_tbl[[1]][[2]] <- tg_label(as.character(sum(!is.na(data[,row]))))
       
       sapply(1:length(categories), FUN=function(category) {
         inner_tbl[[1]][[category+2]] <- tg_quantile(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
       })
       
-      tbl[[row_idx]][[col_idx]] <- inner_tbl
+      tbl[[row_idx]][[col_idx]] <<- inner_tbl
     })
   })
   

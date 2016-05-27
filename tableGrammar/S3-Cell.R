@@ -13,40 +13,41 @@ tg_cell <- function(contents=NA)
   } 
   else
   {
+    print(traceback())
     stop("Improper table cell construction")
   }
 }
 
 tg_table <- function(rows, cols)
 {
-  nt <- sapply(1:rows, FUN=function(x) list(sapply(1:cols, FUN=function(x) cell())))
+  nt <- sapply(1:rows, FUN=function(x) list(sapply(1:cols, FUN=function(x) tg_cell())))
   
-  structure(cell(nt), class="tg_table")
+  structure(tg_cell(nt), class=c("tg_table", "tg_cell") ) 
 }
 
 tg_label <- function(text, units=NA)
 {
-  structure(cell(list(label=as.character(text), units=as.character(units))), class = "tg_label")
+  structure(tg_cell(list(label=as.character(text), units=as.character(units))), class = c("tg_label", "tg_cell"))
 }
 
 tg_quantile <- function(quantiles)
 {
-  structure(cell(list(q25=quantiles[2], q50=quantiles[3], q75=quantiles[4])), class="tg_quantile")
+  structure(tg_cell(list(q25=quantiles[2], q50=quantiles[3], q75=quantiles[4])), class=c("tg_quantile", "tg_cell"))  
 }
 
 tg_fstat <- function(f, n1, n2, p)
 {
-  structure(cell(list(f=f, n1=n1, n2=n2, p=p)), class="tg_fstat")
+  structure(tg_cell(list(f=f, n1=n1, n2=n2, p=p)), class=c("tg_fstat","tg_cell"))
 }
 
 tg_fraction <- function(numerator, denominator)
 {
-  structure(cell(list(numerator=numerator, denominator=denominator)), class="tg_fraction")
+  structure(tg_cell(list(numerator=numerator, denominator=denominator)), class=c("tg_fraction","tg_cell"))
 }
 
 tg_chi2 <- function(chi2, n, p)
 {
-  structure(cell(list(chi2=chi2, n=n, p=p)), class="tg_chi2")
+  structure(tg_cell(list(chi2=chi2, n=n, p=p)), class=c("tg_chi2", "tg_cell"))
 }
 
 # Now test with serum bili row
