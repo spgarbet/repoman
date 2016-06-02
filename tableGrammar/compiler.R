@@ -21,10 +21,10 @@ summarize_kruskal_horz <- function(data, row, column)
     tbl[[1]][[category+1]] <- tg_quantile(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
   })
   
-  # TODO: Need test statistic here.
-  test <- kruskal.test(data[,row], data[,column], na.action="na.omit")
+  # Kruskal-Wallis via F-distribution
+  test <- spearman2(data[,column], data[,row], na.action=na.retain)
   
-  tbl[[1]][[length(categories)+2]] <- tg_fstat(test$statistics, test$parameter, N-1-test$parameter, test$p.value)
+  tbl[[1]][[length(categories)+2]] <- tg_fstat(test$F, test$df1, test$df2, test$P)
 
   tbl  
 }
@@ -94,6 +94,14 @@ labels <- function(elements, data)
   list(c("",rows), cols)
 }
 
+data_type <- function(x)
+{
+  if(     is.factor(x))  "factor"
+  else if(is.logical(x)) "logical"
+  else if(is.numeric(x)) "numeric"
+  else                   stop(paste("Unsupported class/type - ",class(x), typeof(x)))
+}
+
 tg_create_table <- function(ast, data, transforms)
 {
   elements <- ast$elements()
@@ -107,8 +115,11 @@ tg_create_table <- function(ast, data, transforms)
     
     sapply(2:height, FUN=function(row_idx) {
       row <- elements[[2]][row_idx-1]
+      
+      rowtype <- data_type(data[,row])
+      coltype <- data_type(data[,column])
 
-      transform <- transforms[[class(data[,row])]][[class(data[,column])]]
+      transform <- transforms[[rowtype]][[coltype]]
 
       # The +1 leaves room for labels
       tbl[[row_idx]][[col_idx]] <<- transform(data, row, column)
