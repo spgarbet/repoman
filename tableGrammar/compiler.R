@@ -5,25 +5,26 @@ library(Hmisc)
 
 ## Default Summary Functions
 
-#### Data required:
-#row_idx
-#col_idx
-#lbl
-
-# FIXME: This function needs to be able to "flip"
 summarize_kruskal_horz <- function(data, row, column)
 {
   categories <- levels(data[,column])
   
-  tbl <- tg_table(1, length(categories) + 2, TRUE) # n + no. categories + test statistic
+  # TODO: Table needs a "col / row label"
+  tbl <- tg_table(1, length(categories) + 2, TRUE) # n + #categories + test statistic
   
-  tbl[[1]][[1]] <- tg_label(as.character(sum(!is.na(data[,row]))))
+  # N value
+  N <- sum(!is.na(data[,row]))
+  tbl[[1]][[1]] <- tg_label(as.character(N))
   
+  # The quantiles by category
   sapply(1:length(categories), FUN=function(category) {
     tbl[[1]][[category+1]] <- tg_quantile(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
   })
   
   # TODO: Need test statistic here.
+  test <- kruskal.test(data[,row], data[,column], na.action="na.omit")
+  
+  tbl[[1]][[length(categories)+2]] <- tg_fstat(test$statistics, test$parameter, N-1-test$parameter, test$p.value)
 
   tbl  
 }
@@ -96,25 +97,20 @@ labels <- function(elements, data)
 tg_create_table <- function(ast, data, transforms)
 {
   elements <- ast$elements()
-  
-  lbl <- labels(elements, data)
 
-  height <- length(lbl[[1]]) - 1
-  width  <- length(lbl[[2]])
-  
-  tbl <- tg_table(height, width)
+  width  <- length(elements[[1]]) + 1
+  height <- length(elements[[2]]) + 1
+  tbl    <- tg_table(height, width)
 
-  sapply(1:width, FUN=function(col_idx) {
-    column <- elements[[1]][col_idx]
+  sapply(2:width, FUN=function(col_idx) {
+    column <- elements[[1]][col_idx-1]
     
-    sapply(1:height, FUN=function(row_idx) {
-      row <- elements[[2]][row_idx]
+    sapply(2:height, FUN=function(row_idx) {
+      row <- elements[[2]][row_idx-1]
 
-      #FIXME!!!!
-      inner_tbl[[1]][[1]] <- tg_label(lbl[[1]][row_idx+1]) # FIXME: Split out units
-            
-      transform <- transforms[[class(row)]][[class(column)]]
+      transform <- transforms[[class(data[,row])]][[class(data[,column])]]
 
+      # The +1 leaves room for labels
       tbl[[row_idx]][[col_idx]] <<- transform(data, row, column)
     })
   })
@@ -134,13 +130,12 @@ summary.table <- function(object)
   print(object$cells)
 }
 
-library(Hmisc)
 getHdata(pbc)
-#table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
-#test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
+test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-#test_table
+test_table
 
 #summary(table)
 #index(table)
