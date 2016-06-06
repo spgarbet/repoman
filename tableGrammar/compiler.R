@@ -9,8 +9,9 @@ summarize_kruskal_horz <- function(data, row, column)
 {
   categories <- levels(data[,column])
   
-  # TODO: Table needs a "col / row label"
-  tbl <- tg_table(1, length(categories) + 2, TRUE) # n + #categories + test statistic
+  # TODO: Table needs a "col / row label" Maybe on expansion?
+  # 1 X (n + no. categories + test statistic)
+  tbl <- tg_table(1, length(categories) + 2, TRUE)
   
   # N value
   N <- sum(!is.na(data[,row]))
@@ -18,25 +19,57 @@ summarize_kruskal_horz <- function(data, row, column)
   
   # The quantiles by category
   sapply(1:length(categories), FUN=function(category) {
-    tbl[[1]][[category+1]] <- tg_quantile(quantile(data[pbc[,column] == categories[category], row], na.rm=TRUE))
+    tbl[[1]][[category+1]] <- tg_quantile(quantile(data[data[,column] == categories[category], row], na.rm=TRUE))
   })
   
   # Kruskal-Wallis via F-distribution
   test <- spearman2(data[,column], data[,row], na.action=na.retain)
   
-  tbl[[1]][[length(categories)+2]] <- tg_fstat(test$F, test$df1, test$df2, test$P)
+  tbl[[1]][[length(categories)+2]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
 
   tbl  
 }
 
 summarize_kruskal_vert <- function(data, row, column)
 {
-  tg_table(1, 1, TRUE)
+  categories <- levels(data[,row])
+  
+  # TODO: Table needs a "col / row label" Maybe on expansion?
+  # N value
+  #N <- sum(!is.na(data[,row]))
+  #tbl[[1]][[1]] <- tg_label(as.character(N))
+  
+  tbl <- tg_table(length(categories), 3, TRUE) # no. categories X 3
+  
+  # The quantiles by category
+  sapply(1:length(categories), FUN=function(category) {
+    x <- data[data[,row] == categories[category], column]
+    tbl[[category]][[1]] <- length(x)
+    tbl[[category]][[2]] <- tg_quantile(quantile(x, na.rm=TRUE))
+  })
+  
+  # Kruskal-Wallis via F-distribution
+  test <- spearman2(data[,row], data[,column], na.action=na.retain)
+  
+  tbl[[1]][[3]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
+  
+  tbl  
 }
 
 summarize_pearson <- function(data, row, column)
 {
-  tg_table(1, 1, TRUE)
+  row_categories <- 
+  col_categories <- 
+  n <- length(row_categories)
+  m <- length(col_categories)
+  
+  # TODO: Table needs a "col / row label" Maybe on expansion?
+  
+  # N X (M+2)
+  tbl <- tg_table(n, m+2, TRUE) 
+  
+    
+  tbl
 }
 
 summarize_spearman <- function(data, row, column)
@@ -44,84 +77,100 @@ summarize_spearman <- function(data, row, column)
   tg_table(1, 1, TRUE)
 }
 
-# Top  level list is row "class"
-# Next level list is column "class"
-transformDefaults = list(
-  numeric = list(
-              numeric = summarize_spearman,
-              factor  = summarize_kruskal_horz,
-              logical = summarize_kruskal_horz
-            ),
-  factor  = list(
-              numeric = summarize_kruskal_vert,
-              factor  = summarize_pearson,
-              logical = summarize_pearson
-            ),
-  logical = list(
-              numeric = summarize_kruskal_vert,
-              factor  = summarize_pearson,
-              logical = summarize_pearson
-            )
-)
-
-
-labels <- function(elements, data)
+summarize_ordinal_lr <- function(data, row, column)
 {
-  rows <- sapply(elements[[2]],
-    FUN=function(x) 
-    {
-      l <- x
-      try({
-        l2 <- label(data[x])
-        if(nchar(l2)>0) {l<-l2}
-      })
-      l
-    }
-  )
-  
-  cols <- sapply(elements[[1]],
-    FUN=function(x)
-    {
-      l <- x
-      try({
-        l2 <- label(data[x])
-        if(nchar(l2)>0) {l<-l2}
-      })
-      l
-    }
-  )
-  
-  list(c("",rows), cols)
+  tg_table(1, 1, TRUE)
 }
 
+# Used to determine "type" of data for transform
 data_type <- function(x)
 {
-  if(     is.factor(x))  "factor"
+  if(     is.ordered(x)) "ordered"
+  else if(is.factor(x) ) "factor"
   else if(is.logical(x)) "logical"
   else if(is.numeric(x)) "numeric"
   else                   stop(paste("Unsupported class/type - ",class(x), typeof(x)))
 }
 
-tg_create_table <- function(ast, data, transforms)
+# Top  level list is row "class"
+# Next level list is column "class"
+# TODO: ordered needs to be made sensible
+transformDefaults = list(
+  numeric = list(
+              numeric = summarize_spearman,
+              factor  = summarize_kruskal_horz,
+              logical = summarize_kruskal_horz,
+              ordered = summarize_ordinal_lr
+            ),
+  factor  = list(
+              numeric = summarize_kruskal_vert,
+              factor  = summarize_pearson,
+              logical = summarize_pearson,
+              ordered = summarize_ordinal_lr
+            ),
+  logical = list(
+              numeric = summarize_kruskal_vert,
+              factor  = summarize_pearson,
+              logical = summarize_pearson,
+              ordered = summarize_ordinal_lr
+            ),
+  ordered = list(
+              numeric = summarize_kruskal_vert,
+              factor  = summarize_pearson,
+              logical = summarize_pearson,
+              ordered = summarize_ordinal_lr
+            )
+)
+
+
+#labels <- function(elements, data)
+#{
+#  rows <- sapply(elements[[2]],
+#    FUN=function(x) 
+#    {
+#      l <- x
+#      try({
+#        l2 <- label(data[x])
+#        if(nchar(l2)>0) {l<-l2}
+#      })
+#      l
+#    }
+#  )
+#  
+#  cols <- sapply(elements[[1]],
+#    FUN=function(x)
+#    {
+#      l <- x
+#      try({
+#        l2 <- label(data[x])
+#        if(nchar(l2)>0) {l<-l2}
+#      })
+#      l
+#    }
+#  )
+#  
+#  list(c("",rows), cols)
+#}
+
+tg_create_table <- function(ast, data, transforms, data_type_fun)
 {
   elements <- ast$elements()
 
-  width  <- length(elements[[1]]) + 1
-  height <- length(elements[[2]]) + 1
+  width  <- length(elements[[1]])
+  height <- length(elements[[2]])
   tbl    <- tg_table(height, width)
 
-  sapply(2:width, FUN=function(col_idx) {
-    column <- elements[[1]][col_idx-1]
+  sapply(1:width, FUN=function(col_idx) {
+    column <- elements[[1]][col_idx]
     
-    sapply(2:height, FUN=function(row_idx) {
-      row <- elements[[2]][row_idx-1]
+    sapply(1:height, FUN=function(row_idx) {
+      row <- elements[[2]][row_idx]
       
-      rowtype <- data_type(data[,row])
-      coltype <- data_type(data[,column])
+      rowtype <- data_type_fun(data[,row])
+      coltype <- data_type_fun(data[,column])
 
       transform <- transforms[[rowtype]][[coltype]]
 
-      # The +1 leaves room for labels
       tbl[[row_idx]][[col_idx]] <<- transform(data, row, column)
     })
   })
@@ -129,11 +178,11 @@ tg_create_table <- function(ast, data, transforms)
   tbl
 }
 
-tg_summary <- function(formula, data, transforms=transformDefaults)
+tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fun=data_type)
 {
   ast <- Parser$new()$run(formula)
   
-  tg_create_table(ast, data, transforms)
+  tg_create_table(ast, data, transforms, data_type_fun)
 }
 
 summary.table <- function(object)
@@ -142,7 +191,7 @@ summary.table <- function(object)
 }
 
 getHdata(pbc)
-table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+#table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
 test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
