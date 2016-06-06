@@ -8,6 +8,7 @@ library(Hmisc)
 summarize_kruskal_horz <- function(data, row, column)
 {
   categories <- levels(data[,column])
+  if (is.null(categories)) {unique(data[,row])}
   
   # TODO: Table needs a "col / row label" Maybe on expansion?
   # 1 X (n + no. categories + test statistic)
@@ -33,6 +34,7 @@ summarize_kruskal_horz <- function(data, row, column)
 summarize_kruskal_vert <- function(data, row, column)
 {
   categories <- levels(data[,row])
+  if (is.null(categories)) {unique(data[,row])}
   
   # TODO: Table needs a "col / row label" Maybe on expansion?
   # N value
@@ -58,23 +60,50 @@ summarize_kruskal_vert <- function(data, row, column)
 
 summarize_pearson <- function(data, row, column)
 {
-  row_categories <- 
-  col_categories <- 
+  row_categories <- levels(data[,row])
+  if (is.null(row_categories)) {unique(data[,row])}
+  
+  col_categories <- levels(data[,column])
+  if (is.null(col_categories)) {unique(data[,column])}
+  
   n <- length(row_categories)
   m <- length(col_categories)
   
   # TODO: Table needs a "col / row label" Maybe on expansion?
   
   # N X (M+2)
-  tbl <- tg_table(n, m+2, TRUE) 
+  tbl <- tg_table(n, m+2, TRUE)
   
+  N <- length(data[!is.na(data[,row]) & !is.na(data[,column]),row])
+  tbl[[1]][[1]] <- tg_label(as.character(length(N)))
+  
+  # The fractions by category intersection
+  sapply(1:length(col_categories), FUN=function(col_category) {
+    c_x <- data[data[,column] == col_categories[col_category], column]
+    c_x <- c_x[!is.na(c_x)]
+    denominator <- length(c_x)
+    sapply(1:length(row_categories), FUN=function(row_category) {
+      c_xy <- data[data[,column] == col_categories[col_category] &&
+                   data[,row]    == row_categories[row_category], column]
+      c_xy <- c_xy[!is.na(c_xy)]
+      numerator <- length(c_xy)
+      tbl[[row_category]][[col_category+1]] <- tg_fraction(numerator, denominator)
+    })
     
+  })
+  
+  test <- chisq.test(table(data[,row],data[,column]), correct=FALSE)
+  
+  tbl[[1]][[m+2]] <- tg_chi2(test$statistics, test$df, test$p.value)
+  
   tbl
 }
 
 summarize_spearman <- function(data, row, column)
 {
-  tg_table(1, 1, TRUE)
+  tbl <- tg_table(1, 3, TRUE)
+  
+  tbl
 }
 
 summarize_ordinal_lr <- function(data, row, column)
