@@ -58,7 +58,7 @@ summarize_kruskal_vert <- function(data, row, column)
   tbl  
 }
 
-summarize_pearson <- function(data, row, column)
+summarize_chisq <- function(data, row, column)
 {
   row_categories <- levels(data[,row])
   if (is.null(row_categories)) {unique(data[,row])}
@@ -103,7 +103,23 @@ summarize_spearman <- function(data, row, column)
 {
   tbl <- tg_table(1, 3, TRUE)
   
-  tbl
+  # MAYBE, this should use pvrank if it can
+  test <- cor.test(data[,row], data[,column], alternate="two.sided", method="spearman", na.action=na.omit, exact=FALSE)
+  
+  n <- length(data[!is.na(data[,row]) & !is.na(data[,column])  ,row])
+  
+  tbl[[1]][[1]] <- tg_label(as.character(n) )
+  
+  tbl[[1]][[2]] <- tg_estimate(test$estimate)
+  
+  # Reversed engineered from cor.test for spearman  
+  q <- test$statistic
+  den <- (n * (n^2 - 1))/6
+  r <- 1 - q/den
+  statistic <- r/sqrt((1 - r^2)/(n - 2))
+  
+  tbl[[1]][[3]] <- tg_studentt(statistic, n-2, test$p.value)
+  
 }
 
 summarize_ordinal_lr <- function(data, row, column)
@@ -126,27 +142,27 @@ data_type <- function(x)
 # TODO: ordered needs to be made sensible
 transformDefaults = list(
   numeric = list(
-              numeric = summarize_spearman,
+              numeric = summarize_pearson,
               factor  = summarize_kruskal_horz,
               logical = summarize_kruskal_horz,
               ordered = summarize_ordinal_lr
             ),
   factor  = list(
               numeric = summarize_kruskal_vert,
-              factor  = summarize_pearson,
-              logical = summarize_pearson,
+              factor  = summarize_chisq,
+              logical = summarize_chisq,
               ordered = summarize_ordinal_lr
             ),
   logical = list(
               numeric = summarize_kruskal_vert,
-              factor  = summarize_pearson,
-              logical = summarize_pearson,
+              factor  = summarize_chisq,
+              logical = summarize_chisq,
               ordered = summarize_ordinal_lr
             ),
   ordered = list(
               numeric = summarize_kruskal_vert,
-              factor  = summarize_pearson,
-              logical = summarize_pearson,
+              factor  = summarize_chisq,
+              logical = summarize_chisq,
               ordered = summarize_ordinal_lr
             )
 )

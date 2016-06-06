@@ -35,6 +35,11 @@ tg_quantile <- function(quantiles)
   structure(tg_cell(list(q25=quantiles[2], q50=quantiles[3], q75=quantiles[4])), class=c("tg_quantile", "tg_cell"))  
 }
 
+tg_estimate <- function(value, low=NA, high=NA, conf.level=0.95)
+{
+  structure(tg_cell(list(value=value, low=low, high=high, width=width)), class=c("tg_estimate", "tg_cell"))
+}
+
 tg_fstat <- function(f, n1, n2, p)
 {
   structure(tg_cell(list(f=f, n1=n1, n2=n2, p=p)), class=c("tg_fstat","tg_cell"))
@@ -45,19 +50,12 @@ tg_fraction <- function(numerator, denominator)
   structure(tg_cell(list(numerator=numerator, denominator=denominator)), class=c("tg_fraction","tg_cell"))
 }
 
-tg_chi2 <- function(chi2, n, p)
+tg_chi2 <- function(chi2, df, p)
 {
-  structure(tg_cell(list(chi2=chi2, n=n, p=p)), class=c("tg_chi2", "tg_cell"))
+  structure(tg_cell(list(chi2=chi2, df=df, p=p)), class=c("tg_chi2", "tg_cell"))
 }
 
-# Now test with serum bili row
-serum_bili <- tg_table(1, 6)
-serum_bili[[1]][[1]] <- tg_label("Serum Bilirubin", "mg/dl")
-serum_bili[[1]][[2]] <- tg_label("418")
-serum_bili[[1]][[3]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "D-penicillamine"]))
-serum_bili[[1]][[4]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "placebo"]))
-serum_bili[[1]][[5]] <- tg_quantile(quantile(pbc$bili[pbc$drug == "not randomized"]))
-serum_bili[[1]][[6]] <- tg_fstat(0.03, 2, 415, 0.972)
-
-
-
+tg_studentt <- function(t, df, p)
+{
+  structure(tg_cell(list(t=t, df=df, p=p)), class=c("tg_studentt", "tg_cell"))
+}
