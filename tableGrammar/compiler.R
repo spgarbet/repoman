@@ -20,7 +20,7 @@ summarize_kruskal_horz <- function(data, row, column)
   
   # The quantiles by category
   sapply(1:length(categories), FUN=function(category) {
-    tbl[[1]][[category+1]] <- tg_quantile(quantile(data[data[,column] == categories[category], row], na.rm=TRUE))
+    tbl[[1]][[category+1]] <<- tg_quantile(quantile(data[data[,column] == categories[category], row], na.rm=TRUE))
   })
   
   # Kruskal-Wallis via F-distribution
@@ -46,8 +46,8 @@ summarize_kruskal_vert <- function(data, row, column)
   # The quantiles by category
   sapply(1:length(categories), FUN=function(category) {
     x <- data[data[,row] == categories[category], column]
-    tbl[[category]][[1]] <- length(x)
-    tbl[[category]][[2]] <- tg_quantile(quantile(x, na.rm=TRUE))
+    tbl[[category]][[1]] <<- tg_label(as.character(length(x)))
+    tbl[[category]][[2]] <<- tg_quantile(quantile(x, na.rm=TRUE))
   })
   
   # Kruskal-Wallis via F-distribution
@@ -87,7 +87,7 @@ summarize_chisq <- function(data, row, column)
                    data[,row]    == row_categories[row_category], column]
       c_xy <- c_xy[!is.na(c_xy)]
       numerator <- length(c_xy)
-      tbl[[row_category]][[col_category+1]] <- tg_fraction(numerator, denominator)
+      tbl[[row_category]][[col_category+1]] <<- tg_fraction(numerator, denominator)
     })
     
   })
@@ -289,9 +289,36 @@ tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fu
   tg_create_table(ast, data, transforms, data_type_fun)
 }
 
+
+summary.tg_cell <- function(object) ""
+
+summary.tg_label <- function(object) 
+{
+  if(is.na(object$units))
+    object$label
+  else
+    paste(object$label, " (", object$units, ")", sep="")
+}
+
+summary.tg_quantile <- function(object)
+{
+  paste(object$q25, " *", object$q50, "* ", object$q75, sep="")
+}
+
 summary.tg_table <- function(object)
 {
-  print(object)
+  rows <- length(object)
+  cols <- length(object[[1]])
+  
+  text <- matrix(data=rep("", rows*cols), nrow=rows, ncol=cols)
+  
+  sapply(1:rows, FUN=function(row) {
+    sapply(1:cols, FUN=function(col) {
+      text[row,col] <<- summary(object[[row]][[col]])
+    })
+  })
+  
+  text
 }
 
 getHdata(pbc)
