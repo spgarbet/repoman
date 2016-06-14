@@ -94,7 +94,7 @@ summarize_chisq <- function(data, row, column)
   
   test <- chisq.test(table(data[,row],data[,column]), correct=FALSE)
   
-  tbl[[1]][[m+2]] <- tg_chi2(test$statistics, test$df, test$p.value)
+tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
   
   tbl
 }
@@ -319,6 +319,29 @@ summary.tg_table <- function(object)
   })
   
   text
+}
+
+summary.tg_estimate <- function(object)
+{
+  if(is.na(object$low))
+    as.character(object$value)
+  else
+    paste(object$value, " (",object$low,",",object$high,")")
+}
+
+summary.tg_fstat <- function(object)
+{
+  paste("F_{",object$n1,",",object$n2,"}=",round(object$f,2)," P=",round(object$p,3),sep="")
+}
+
+summary.tg_fraction <- function(object)
+{
+  paste(round(object$numerator/object$denominator,0),"%",sep="")
+}
+
+summary.tg_chi2 <- function(object)
+{
+  paste("X^2_",object$df,"=",round(object$chi2,2)," P=",round(object$p,3),sep="")
 }
 
 getHdata(pbc)
