@@ -226,8 +226,8 @@ tg_flatten <- function(table)
     sapply(1:length(table[[row]]), FUN=function(col) {
       element <- table[[row]][[col]]
       
-      cat(row, col, class(element), '\n')
-      cat("   => ", output_row, output_col, '\n')
+      #cat(row, col, class(element), '\n')
+      #cat("   => ", output_row, output_col, '\n')
       
       if(inherits(element, "tg_table") && attr(element, "embedded"))
       {
