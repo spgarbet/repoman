@@ -22,7 +22,11 @@ tg_table <- function(rows, cols, embedded=FALSE)
 {
   nt <- sapply(1:rows, FUN=function(x) list(sapply(1:cols, FUN=function(x) tg_cell())))
   
-  structure(tg_cell(nt), class=c("tg_table", "tg_cell") ) 
+  tbl <- structure(tg_cell(nt), class=c("tg_table", "tg_cell") ) 
+  
+  attr(tbl, "embedded") <- embedded
+  
+  tbl
 }
 
 tg_label <- function(text, units=NA)

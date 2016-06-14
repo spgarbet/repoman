@@ -113,9 +113,7 @@ summarize_spearman <- function(data, row, column)
   tbl[[1]][[2]] <- tg_estimate(test$estimate)
   
   # Reversed engineered from cor.test for spearman  
-  q <- test$statistic
-  den <- (n * (n^2 - 1))/6
-  r <- 1 - q/den
+  r <- test$estimate
   statistic <- r/sqrt((1 - r^2)/(n - 2))
   
   tbl[[1]][[3]] <- tg_studentt(statistic, n-2, test$p.value)
@@ -142,7 +140,7 @@ data_type <- function(x)
 # TODO: ordered needs to be made sensible
 transformDefaults = list(
   numeric = list(
-              numeric = summarize_pearson,
+              numeric = summarize_spearman,
               factor  = summarize_kruskal_horz,
               logical = summarize_kruskal_horz,
               ordered = summarize_ordinal_lr
@@ -197,6 +195,67 @@ transformDefaults = list(
 #  list(c("",rows), cols)
 #}
 
+
+tg_flatten <- function(table)
+{
+  rows    <- 0
+  cols    <- 0
+  
+  sapply(1:length(table), FUN=function(row) {
+    element <- table[[row]][[1]]
+    if(inherits(element, "tg_table") && attr(element, "embedded"))
+      rows <<- rows + length(element)
+    else
+      rows <<- rows + 1
+  })
+  sapply(1:length(table[[1]]), FUN=function(col){
+    element <- table[[1]][[col]]
+    if(inherits(element, "tg_table") && attr(element, "embedded"))
+      cols <<- cols + length(element[[1]])
+    else
+      cols <<- cols + 1
+  })
+  
+  label_rows <- 1 #FIXME: Should be possible to have more than 1
+  label_cols <- 1
+  new_tbl <- tg_table(rows+label_rows, cols+label_cols) 
+  
+  output_row <- label_rows + 1
+  sapply(1:length(table), FUN=function(row) {
+    output_col <- label_cols + 1
+    sapply(1:length(table[[row]]), FUN=function(col) {
+      element <- table[[row]][[col]]
+      
+      cat(row, col, class(element), '\n')
+      cat("   => ", output_row, output_col, '\n')
+      
+      if(inherits(element, "tg_table") && attr(element, "embedded"))
+      {
+        ## Need another double sapply here.
+        sapply(element, FUN=function(inner_row)
+        {
+          sapply(inner_row, FUN=function(inner_element)
+          {
+            new_tbl[[output_row]][[output_col]] <<- inner_element
+            output_col <<- output_col + 1
+          })
+          output_col <<- output_col - length(inner_row)
+          output_row <<- output_row + 1
+        })
+      }
+      else
+      {
+        new_tbl[[output_row]][[output_col]] <<- element
+        output_col <<- output_col + 1
+        output_row <<- output_row + 1
+      }
+    })
+    
+  })
+  
+  new_tbl
+}
+
 tg_create_table <- function(ast, data, transforms, data_type_fun)
 {
   elements <- ast$elements()
@@ -220,7 +279,7 @@ tg_create_table <- function(ast, data, transforms, data_type_fun)
     })
   })
   
-  tbl
+  tg_flatten(tbl)
 }
 
 tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fun=data_type)
@@ -230,15 +289,15 @@ tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fu
   tg_create_table(ast, data, transforms, data_type_fun)
 }
 
-summary.table <- function(object)
+summary.tg_table <- function(object)
 {
-  print(object$cells)
+  print(object)
 }
 
 getHdata(pbc)
-#table <- summaryTG(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
-test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
+#test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
 test_table
 
@@ -246,4 +305,5 @@ test_table
 #index(table)
 #html5(table)
 #latex(table)
+
 
