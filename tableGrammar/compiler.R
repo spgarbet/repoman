@@ -266,7 +266,7 @@ tg_flatten <- function(table)
       output_col <<- output_col + length(element[[1]])
       
     })
-    output_row <<- output_row + length(table[[row]])
+    output_row <<- output_row + length(table[[row]][[1]])
   })
   
   new_tbl
@@ -353,7 +353,9 @@ summary.tg_fstat <- function(object)
 
 summary.tg_fraction <- function(object)
 {
-  paste(round(100*object$numerator/object$denominator,0),"%",sep="")
+  paste(round(100*object$numerator/object$denominator,0),"%  ",
+        object$numerator,"/",object$denominator,
+        sep="")
 }
 
 summary.tg_chi2 <- function(object)
