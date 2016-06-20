@@ -116,6 +116,7 @@ summarize_chisq <- function(data, row, column)
   if(length(tbl) == 2)
   {
     tbl[[2]][[m+2]] <- tbl[[1]][[m+2]]
+    tbl[[2]][[1]]   <- tbl[[1]][[1]]
     tbl[[1]]        <- tbl[[2]]
     tbl[[2]]        <- NULL
   }
