@@ -4,8 +4,18 @@ source("tableGrammar/S3-Cell.R")
 library(Hmisc)
 getHdata(pbc)
 
-
 ## Default Summary Functions
+
+
+derive_label <- function(data, column)
+{
+  l <- column
+  try({
+        l2 <- label(data[column])
+        if(nchar(l2)>0) {l<-l2}
+  })
+  tg_label(l)
+}
 
 summarize_kruskal_horz <- function(data, row, column)
 {
@@ -29,6 +39,8 @@ summarize_kruskal_horz <- function(data, row, column)
   test <- spearman2(data[,column], data[,row], na.action=na.retain)
   
   tbl[[1]][[length(categories)+2]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
+
+  attr(tbl, "row_label") <- derive_label(data, row)
 
   tbl  
 }
@@ -181,37 +193,6 @@ transformDefaults = list(
               ordered = summarize_ordinal_lr
             )
 )
-
-
-#labels <- function(elements, data)
-#{
-#  rows <- sapply(elements[[2]],
-#    FUN=function(x) 
-#    {
-#      l <- x
-#      try({
-#        l2 <- label(data[x])
-#        if(nchar(l2)>0) {l<-l2}
-#      })
-#      l
-#    }
-#  )
-#  
-#  cols <- sapply(elements[[1]],
-#    FUN=function(x)
-#    {
-#      l <- x
-#      try({
-#        l2 <- label(data[x])
-#        if(nchar(l2)>0) {l<-l2}
-#      })
-#      l
-#    }
-#  )
-#  
-#  list(c("",rows), cols)
-#}
-
 
 tg_flatten <- function(table)
 {
