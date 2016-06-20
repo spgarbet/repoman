@@ -4,6 +4,15 @@ source("tableGrammar/S3-Cell.R")
 library(Hmisc)
 getHdata(pbc)
 
+### function to round values to N significant digits
+# input:   vec       vector of numeric
+#          n         integer is the required sigfig  
+# output:  outvec    vector of numeric rounded to N sigfig
+sigfig <- function(vec, n=3)
+{ 
+  formatC(signif(vec,digits=n), digits=n,format="fg", flag="#") 
+}   
+
 ## Default Summary Functions
 
 summarize_kruskal_horz <- function(data, row, column)
@@ -61,7 +70,7 @@ summarize_kruskal_vert <- function(data, row, column)
 
 summarize_chisq <- function(data, row, column)
 {
-  row_categories <- levels(data[,row])
+  row_categories <- rev(levels(data[,row])) # FIXME: Why are levels reversed to match summaryM?
   if (is.null(row_categories)) {unique(data[,row])}
   
   col_categories <- levels(data[,column])
@@ -310,7 +319,7 @@ summary.tg_label <- function(object)
 
 summary.tg_quantile <- function(object)
 {
-  paste(object$q25, " *", object$q50, "* ", object$q75, sep="")
+  paste(sigfig(object$q25), " *", sigfig(object$q50), "* ", sigfig(object$q75), sep="")
 }
 
 summary.tg_table <- function(object)
@@ -344,7 +353,7 @@ summary.tg_fstat <- function(object)
 
 summary.tg_fraction <- function(object)
 {
-  paste(round(object$numerator/object$denominator,0),"%",sep="")
+  paste(round(100*object$numerator/object$denominator,0),"%",sep="")
 }
 
 summary.tg_chi2 <- function(object)
@@ -354,12 +363,12 @@ summary.tg_chi2 <- function(object)
 
 
 #data(pbc)
-#pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE)
-#test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE)
+test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-#flat <- tg_flatten(test_table)
+flat <- tg_flatten(test_table)
 
 #summary(table)
 #index(table)
