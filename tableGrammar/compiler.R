@@ -70,7 +70,7 @@ summarize_kruskal_vert <- function(data, row, column)
 
 summarize_chisq <- function(data, row, column)
 {
-  row_categories <- rev(levels(data[,row])) # FIXME: Why are levels reversed to match summaryM?
+  row_categories <- levels(data[,row])
   if (is.null(row_categories)) {unique(data[,row])}
   
   col_categories <- levels(data[,column])
@@ -97,18 +97,27 @@ summarize_chisq <- function(data, row, column)
                    data[,row]    == row_categories[row_category], column]
       c_xy <- c_xy[!is.na(c_xy)]
       numerator <- length(c_xy)
-      tbl[[row_category]][[col_category+1]] <<- tg_fraction(numerator, denominator)
+      if(numerator > 0)
+      {
+        tbl[[row_category]][[col_category+1]] <<- tg_fraction(numerator, denominator)
+      }
     })
     
   })
   
-  test <- chisq.test(table(data[,row],data[,column]), correct=FALSE)
+  y <- table(data[,row],data[,column], useNA="no")
+  y <- y[,which(!apply(y,2,FUN = function(x){all(x == 0)}))]
+  y <- y[which(!apply(y,1,FUN = function(x){all(x == 0)})),]
+  
+  test <- chisq.test(y, correct=FALSE)
   
   tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
   
   if(length(tbl) == 2)
   {
-    tbl[[2]] <- NULL
+    tbl[[2]][[m+2]] <- tbl[[1]][[m+2]]
+    tbl[[1]]        <- tbl[[2]]
+    tbl[[2]]        <- NULL
   }
   
   tbl
