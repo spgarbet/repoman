@@ -2,6 +2,7 @@ source("tableGrammar/parser.R")
 source("tableGrammar/S3-Cell.R")
 
 library(Hmisc)
+getHdata(pbc)
 
 ## Default Summary Functions
 
@@ -75,7 +76,7 @@ summarize_chisq <- function(data, row, column)
   tbl <- tg_table(n, m+2, TRUE)
   
   N <- length(data[!is.na(data[,row]) & !is.na(data[,column]),row])
-  tbl[[1]][[1]] <- tg_label(as.character(length(N)))
+  tbl[[1]][[1]] <- tg_label(as.character(N))
   
   # The fractions by category intersection
   sapply(1:length(col_categories), FUN=function(col_category) {
@@ -83,7 +84,7 @@ summarize_chisq <- function(data, row, column)
     c_x <- c_x[!is.na(c_x)]
     denominator <- length(c_x)
     sapply(1:length(row_categories), FUN=function(row_category) {
-      c_xy <- data[data[,column] == col_categories[col_category] &&
+      c_xy <- data[data[,column] == col_categories[col_category] &
                    data[,row]    == row_categories[row_category], column]
       c_xy <- c_xy[!is.na(c_xy)]
       numerator <- length(c_xy)
@@ -95,6 +96,11 @@ summarize_chisq <- function(data, row, column)
   test <- chisq.test(table(data[,row],data[,column]), correct=FALSE)
   
   tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
+  
+  if(length(tbl) == 2)
+  {
+    tbl[[2]] <- NULL
+  }
   
   tbl
 }
@@ -346,12 +352,14 @@ summary.tg_chi2 <- function(object)
   paste("X^2_",object$df,"=",round(object$chi2,2)," P=",round(object$p,3),sep="")
 }
 
-getHdata(pbc)
-test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+
+#data(pbc)
+#pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE)
+#test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #table <- summaryTG(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-flat <- tg_flatten(test_table)
+#flat <- tg_flatten(test_table)
 
 #summary(table)
 #index(table)
