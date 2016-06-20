@@ -94,7 +94,7 @@ summarize_chisq <- function(data, row, column)
   
   test <- chisq.test(table(data[,row],data[,column]), correct=FALSE)
   
-tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
+  tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
   
   tbl
 }
@@ -242,15 +242,16 @@ tg_flatten <- function(table)
           output_col <<- output_col - length(inner_row)
           output_row <<- output_row + 1
         })
+        output_row <<- output_row - length(element)
       }
       else
       {
         new_tbl[[output_row]][[output_col]] <<- element
-        output_col <<- output_col + 1
-        output_row <<- output_row + 1
       }
+      output_col <<- output_col + length(element[[1]])
+      
     })
-    
+    output_row <<- output_row + length(table[[row]])
   })
   
   new_tbl
@@ -279,7 +280,8 @@ tg_create_table <- function(ast, data, transforms, data_type_fun)
     })
   })
   
-  tg_flatten(tbl)
+ # tg_flatten(tbl)
+  tbl
 }
 
 tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fun=data_type)
@@ -349,7 +351,7 @@ test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + s
 #table <- summaryTG(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-test_table
+flat <- tg_flatten(test_table)
 
 #summary(table)
 #index(table)
