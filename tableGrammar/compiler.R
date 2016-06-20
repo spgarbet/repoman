@@ -4,14 +4,6 @@ source("tableGrammar/S3-Cell.R")
 library(Hmisc)
 getHdata(pbc)
 
-### function to round values to N significant digits
-# input:   vec       vector of numeric
-#          n         integer is the required sigfig  
-# output:  outvec    vector of numeric rounded to N sigfig
-sigfig <- function(vec, n=3)
-{ 
-  formatC(signif(vec,digits=n), digits=n,format="fg", flag="#") 
-}   
 
 ## Default Summary Functions
 
@@ -316,6 +308,19 @@ tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fu
   tg_create_table(ast, data, transforms, data_type_fun)
 }
 
+### function to round values to N significant digits
+# input:   vec       vector of numeric
+#          n         integer is the required sigfig  
+# output:  outvec    vector of numeric rounded to N sigfig
+sigfig <- function(vec, n=3)
+{ 
+  formatC(signif(vec,digits=n), digits=n, format="g", flag="#") 
+}   
+
+roundfig <- function(vec, n=3)
+{ 
+  formatC(round(vec,digits=n), digits=n, format="f", flag="#") 
+}  
 
 summary.tg_cell <- function(object) ""
 
@@ -358,19 +363,22 @@ summary.tg_estimate <- function(object)
 
 summary.tg_fstat <- function(object)
 {
-  paste("F_{",object$n1,",",object$n2,"}=",round(object$f,2)," P=",round(object$p,3),sep="")
+  paste("F_{",object$n1,",",object$n2,"}=",roundfig(object$f,2),", P=",roundfig(object$p,3),sep="")
 }
 
 summary.tg_fraction <- function(object)
 {
-  paste(round(100*object$numerator/object$denominator,0),"%  ",
-        object$numerator,"/",object$denominator,
+  x <- sprintf("%3s",round(100*object$numerator/object$denominator,0))
+  den <- as.character(object$denominator)
+  num <- sprintf(paste("%",nchar(den),"s",sep=''), object$numerator)
+  paste(x, "%  ",
+        num,"/",den,
         sep="")
 }
 
 summary.tg_chi2 <- function(object)
 {
-  paste("X^2_",object$df,"=",round(object$chi2,2)," P=",round(object$p,3),sep="")
+  paste("    X^2_",object$df,"=",roundfig(object$chi2,2),", P=",roundfig(object$p,3),sep="")
 }
 
 
