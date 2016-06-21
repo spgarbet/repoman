@@ -14,7 +14,18 @@ derive_label <- function(data, column)
         l2 <- label(data[column])
         if(nchar(l2)>0) {l<-l2}
   })
-  tg_label(l)
+  
+  # Find units if they exist
+  x <- strsplit(l, "\\s*\\(")
+  
+  if(length(x[[1]]) <= 1)
+  {
+    tg_label(l)
+  }
+  else
+  {
+    tg_label(x[[1]][1], strsplit(x[[1]][2], "\\)")[[1]][1])
+  }
 }
 
 summarize_kruskal_horz <- function(data, row, column)
@@ -25,6 +36,12 @@ summarize_kruskal_horz <- function(data, row, column)
   # TODO: Table needs a "col / row label" Maybe on expansion?
   # 1 X (n + no. categories + test statistic)
   tbl <- tg_table(1, length(categories) + 2, TRUE)
+  
+  # Label for the table cell
+  row_lbl <- derive_label(data, row)
+  col_lbl <- tg_table(2, 2+length(categories))
+  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[length(categories)+2]] <- tg_label("Test Statistic")
   
   # N value
   N <- sum(!is.na(data[,row]))
@@ -40,7 +57,9 @@ summarize_kruskal_horz <- function(data, row, column)
   
   tbl[[1]][[length(categories)+2]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
 
-  attr(tbl, "row_label") <- derive_label(data, row)
+      
+  attr(tbl, "row_label") <- row_lbl 
+  attr(tbl, "col_label") <- col_lbl
 
   tbl  
 }
@@ -214,8 +233,10 @@ tg_flatten <- function(table)
       cols <<- cols + 1
   })
   
-  label_rows <- 1 #FIXME: Should be possible to have more than 1
-  label_cols <- 1
+  
+  label_rows <- length(attr(table[[1]][[1]], "label")) 
+  label_cols <- length(attr(table[[1]][[1]], "label")[[1]])
+  
   new_tbl <- tg_table(rows+label_rows, cols+label_cols) 
   
   output_row <- label_rows + 1
