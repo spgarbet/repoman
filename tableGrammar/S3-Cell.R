@@ -1,5 +1,4 @@
 
-getHdata(pbc)
 
 tg_cell <- function(contents=NA)
 {
@@ -15,6 +14,34 @@ tg_cell <- function(contents=NA)
   {
     print(traceback())
     stop("Improper table cell construction")
+  }
+}
+
+rows <- function(x) 
+{
+  UseMethod("rows", x)
+}
+
+cols <- function(x) 
+{
+  UseMethod("cols", x)
+}
+
+
+tg_cell.rows <- function(object)
+{
+  length(object)
+}
+
+tg_cell.cols <- function(object)
+{
+  if(length(object) >= 1)
+  {    
+    length(object[[1]])
+  }
+  else
+  {
+    0
   }
 }
 
