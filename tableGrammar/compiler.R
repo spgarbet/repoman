@@ -32,8 +32,7 @@ summarize_kruskal_horz <- function(data, row, column)
 {
   categories <- levels(data[,column])
   if (is.null(categories)) {unique(data[,row])}
-  
-  # TODO: Table needs a "col / row label" Maybe on expansion?
+
   # 1 X (n + no. categories + test statistic)
   tbl <- tg_table(1, length(categories) + 2, TRUE)
   
@@ -71,11 +70,14 @@ summarize_kruskal_vert <- function(data, row, column)
   categories <- levels(data[,row])
   if (is.null(categories)) {unique(data[,row])}
   
-  # TODO: Table needs a "col / row label" Maybe on expansion?
-  # N value
-  #N <- sum(!is.na(data[,row]))
-  #tbl[[1]][[1]] <- tg_label(as.character(N))
+  # Label for the table cell
+  col_lbl <- tg_table(1, 3)
+  row_lbl <- tg_table(length(categories), 1)
   
+  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[2]] <- derive_label(data, column)
+  col_lbl[[1]][[3]] <- tg_label("Test Statistic")
+
   tbl <- tg_table(length(categories), 3, TRUE) # no. categories X 3
   
   # The quantiles by category
@@ -83,12 +85,16 @@ summarize_kruskal_vert <- function(data, row, column)
     x <- data[data[,row] == categories[category], column]
     tbl[[category]][[1]] <<- tg_label(as.character(length(x)))
     tbl[[category]][[2]] <<- tg_quantile(quantile(x, na.rm=TRUE))
+    row_lbl[[category]][[1]] <<- tg_label(category)
   })
   
   # Kruskal-Wallis via F-distribution
   test <- spearman2(data[,row], data[,column], na.action=na.retain)
   
   tbl[[1]][[3]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
+
+  attr(tbl, "row_label") <- row_lbl 
+  attr(tbl, "col_label") <- col_lbl
   
   tbl  
 }
