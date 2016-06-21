@@ -1,6 +1,7 @@
 source("tableGrammar/parser.R")
 source("tableGrammar/S3-Cell.R")
 
+library(stringr)
 library(Hmisc)
 getHdata(pbc)
 
@@ -370,8 +371,8 @@ tg_create_table <- function(ast, data, transforms, data_type_fun)
     })
   })
   
- # tg_flatten(tbl)
-  tbl
+  tg_flatten(tbl)
+  #tbl
 }
 
 tg_summary <- function(formula, data, transforms=transformDefaults, data_type_fun=data_type)
@@ -423,7 +424,31 @@ summary.tg_table <- function(object)
     })
   })
   
-  text
+  maxwidths <- apply(text, 2, FUN=function(x) max(nchar(x), na.rm=TRUE))
+  
+  sapply(1:nrows, FUN=function(row) {
+    sapply(1:ncols, FUN=function(col) {
+      if(col == 1)
+      {
+        text[row,col] <<- str_pad(text[row,col], maxwidths[col], "right")
+      }
+      else
+      {
+        text[row,col] <<- str_pad(text[row,col], maxwidths[col], "both")
+      }
+    })
+  })
+  
+  pasty <- apply(text, 1, function(x) paste(x, collapse="  "))
+
+  cat(paste(rep("=",nchar(pasty[1])),collapse=''),'\n')
+  for(row in pasty)
+  {
+    cat(row,'\n')
+    if(row == pasty[2]) cat(paste(rep("-",nchar(pasty[1])),collapse=''),'\n') # FIXME: This is hardcoded at 2!!!!
+  }
+  cat(paste(rep("=",nchar(pasty[1])),collapse=''),'\n')
+  
 }
 
 summary.tg_estimate <- function(object)
@@ -459,7 +484,7 @@ test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + s
 #test_table <- tg_summary(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-flat <- tg_flatten(test_table)
+#flat <- tg_flatten(test_table)
 
 #summary(table)
 #index(table)
