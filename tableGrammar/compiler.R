@@ -479,14 +479,15 @@ summary.tg_chi2 <- function(object)
   paste("    X^2_",object$df,"=",roundfig(object$chi2,2),", P=",roundfig(object$p,3),sep="")
 }
 
+lbl_stage <- label(pbc["stage"])
 pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE) # Make a factor, instead of guessing
+label(pbc$stage) <- lbl_stage
+
 test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
 #test_table <- tg_summary(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-#flat <- tg_flatten(test_table)
-
-#summary(table)
+summary(table)
 #index(table)
 #html5(table)
 #latex(table)
