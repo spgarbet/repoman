@@ -110,7 +110,16 @@ summarize_chisq <- function(data, row, column)
   n <- length(row_categories)
   m <- length(col_categories)
   
-  # TODO: Table needs a "col / row label" Maybe on expansion?
+  # Label for the table cell
+  row_lbl <- tg_table(length(row_categories), 1)
+  row_lbl[[1]][[1]] <- derive_label(data, row)
+  row_lbl[[1]][[1]]$label <- paste(row_lbl[[1]][[1]]$label,":", row_categories[1])
+  sapply(2:length(row_categories), FUN=function(level){
+    row_lbl[[level]][[1]] <<- tg_label(paste("  ", row_categories[level]))
+  })
+  col_lbl <- tg_table(2, 2+length(col_categories))
+  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[length(col_categories)+2]] <- tg_label("Test Statistic")
   
   # N X (M+2)
   tbl <- tg_table(n, m+2, TRUE)
@@ -133,7 +142,8 @@ summarize_chisq <- function(data, row, column)
         tbl[[row_category]][[col_category+1]] <<- tg_fraction(numerator, denominator)
       }
     })
-    
+    col_lbl[[1]][[col_category+1]] <<- tg_label(col_categories[col_category])
+    col_lbl[[2]][[col_category+1]] <<- tg_label(paste("N=",sum(!is.na(c_x)),sep=''))
   })
   
   y <- table(data[,row],data[,column], useNA="no")
@@ -144,13 +154,22 @@ summarize_chisq <- function(data, row, column)
   
   tbl[[1]][[m+2]] <- tg_chi2(test$statistic, test$parameter, test$p.value)
   
+  # Throw out first if length is 2
   if(length(tbl) == 2)
   {
     tbl[[2]][[m+2]] <- tbl[[1]][[m+2]]
     tbl[[2]][[1]]   <- tbl[[1]][[1]]
     tbl[[1]]        <- tbl[[2]]
     tbl[[2]]        <- NULL
+    
+    # Redo labeling as well
+    row_lbl[[2]]      <- NULL
+    row_lbl[[1]][[1]] <- derive_label(data, row)
+    row_lbl[[1]][[1]] <- tg_label(paste(row_lbl[[1]][[1]]$label,":", row_categories[2]))
   }
+  
+  attr(tbl, "row_label") <- row_lbl 
+  attr(tbl, "col_label") <- col_lbl
   
   tbl
 }
@@ -262,8 +281,8 @@ tg_flatten <- function(table)
       sapply(1:rows(rlabel), FUN=function(inner_row) {
         sapply(1:cols(rlabel), FUN=function(inner_col) {
           new_tbl[[output_row]][[inner_col]] <<- rlabel[[inner_row]][[inner_col]]
-          output_row <<- output_row + 1
         })
+        output_row <<- output_row + 1
       })
     }
     else
@@ -436,8 +455,8 @@ summary.tg_chi2 <- function(object)
 }
 
 pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE) # Make a factor, instead of guessing
-#test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
-test_table <- tg_summary(drug ~ bili, pbc)
+test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+#test_table <- tg_summary(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
 flat <- tg_flatten(test_table)
