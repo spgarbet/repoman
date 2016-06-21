@@ -49,7 +49,10 @@ summarize_kruskal_horz <- function(data, row, column)
   
   # The quantiles by category
   sapply(1:length(categories), FUN=function(category) {
-    tbl[[1]][[category+1]] <<- tg_quantile(quantile(data[data[,column] == categories[category], row], na.rm=TRUE))
+    x <- data[data[,column] == categories[category], row]
+    tbl[[1]][[category+1]] <<- tg_quantile(quantile(x, na.rm=TRUE))
+    col_lbl[[1]][[category+1]] <<- tg_label(categories[category])
+    col_lbl[[2]][[category+1]] <<- tg_label(paste("N=",sum(!is.na(x)),sep=''))
   })
   
   # Kruskal-Wallis via F-distribution
@@ -57,7 +60,6 @@ summarize_kruskal_horz <- function(data, row, column)
   
   tbl[[1]][[length(categories)+2]] <- tg_fstat(test['F'], test['df1'], test['df2'], test['P'])
 
-      
   attr(tbl, "row_label") <- row_lbl 
   attr(tbl, "col_label") <- col_lbl
 
@@ -215,38 +217,82 @@ transformDefaults = list(
 
 tg_flatten <- function(table)
 {
-  rows    <- 0
-  cols    <- 0
-  
-  sapply(1:length(table), FUN=function(row) {
+  # Compute final size of table
+  final_rows    <- 0
+  final_cols    <- 0
+  sapply(1:rows(table), FUN=function(row) {
     element <- table[[row]][[1]]
     if(inherits(element, "tg_table") && attr(element, "embedded"))
-      rows <<- rows + length(element)
+      final_rows <<- final_rows + length(element)
     else
-      rows <<- rows + 1
+      final_rows <<- final_rows + 1
   })
-  sapply(1:length(table[[1]]), FUN=function(col){
+  sapply(1:cols(table), FUN=function(col){
     element <- table[[1]][[col]]
     if(inherits(element, "tg_table") && attr(element, "embedded"))
-      cols <<- cols + length(element[[1]])
+      final_cols <<- final_cols + length(element[[1]])
     else
-      cols <<- cols + 1
+      final_cols <<- final_cols + 1
+  })
+
+  
+  # Grab labels
+  row_label <- attr(table[[1]][[1]], "row_label")
+  col_label <- attr(table[[1]][[1]], "col_label") 
+  
+  # Set aside additional for labeling
+  label_rows <- rows(col_label)
+  label_cols <- cols(row_label)
+  
+  # Allocate final table
+  new_tbl <- tg_table(final_rows+label_rows, final_cols+label_cols) 
+  
+  # Fill in row labels
+  output_row <- label_rows + 1
+  sapply(1:rows(table), FUN=function(row){
+    rlabel <- attr(table[[row]][[1]], "row_label") # Only take row labels from column 1
+    
+    if(inherits(rlabel, "tg_table")) {
+      sapply(1:rows(rlabel), FUN=function(inner_row) {
+        sapply(1:cols(rlabel), FUN=function(inner_col) {
+          new_tbl[[output_row]][[inner_col]] <<- rlabel[[inner_row]][[inner_col]]
+          output_row <<- output_row + 1
+        })
+      })
+    }
+    else
+    {
+      new_tbl[[output_row]][[1]] <<- rlabel
+      output_row <<- output_row + 1
+    }
   })
   
+  # Fill in col labels
+  output_col <- label_cols + 1
+  sapply(1:cols(table), FUN=function(col){
+    rlabel <- attr(table[[1]][[col]], "col_label") # Only take col labels from row 1
+    
+    if(inherits(rlabel, "tg_table")) {
+      sapply(1:cols(rlabel), FUN=function(inner_col) {
+        sapply(1:rows(rlabel), FUN=function(inner_row) {
+          new_tbl[[inner_row]][[output_col]] <<- rlabel[[inner_row]][[inner_col]]
+        })
+        output_col <<- output_col + 1
+      })
+    }
+    else
+    {
+      new_tbl[[1]][[output_col]] <<- rlabel   
+      output_col <<- output_col + 1
+    }
+  })
   
-  label_rows <- length(attr(table[[1]][[1]], "label")) 
-  label_cols <- length(attr(table[[1]][[1]], "label")[[1]])
-  
-  new_tbl <- tg_table(rows+label_rows, cols+label_cols) 
-  
+  # Main loop to fill final from provided
   output_row <- label_rows + 1
-  sapply(1:length(table), FUN=function(row) {
+  sapply(1:rows(table), FUN=function(row) {
     output_col <- label_cols + 1
-    sapply(1:length(table[[row]]), FUN=function(col) {
+    sapply(1:cols(table), FUN=function(col) {
       element <- table[[row]][[col]]
-      
-      #cat(row, col, class(element), '\n')
-      #cat("   => ", output_row, output_col, '\n')
       
       if(inherits(element, "tg_table") && attr(element, "embedded"))
       {
@@ -341,13 +387,13 @@ summary.tg_quantile <- function(object)
 
 summary.tg_table <- function(object)
 {
-  rows <- length(object)
-  cols <- length(object[[1]])
+  nrows <- rows(object)
+  ncols <- cols(object)
   
-  text <- matrix(data=rep("", rows*cols), nrow=rows, ncol=cols)
+  text <- matrix(data=rep("", nrows*ncols), nrow=nrows, ncol=ncols)
   
-  sapply(1:rows, FUN=function(row) {
-    sapply(1:cols, FUN=function(col) {
+  sapply(1:nrows, FUN=function(row) {
+    sapply(1:ncols, FUN=function(col) {
       text[row,col] <<- summary(object[[row]][[col]])
     })
   })
@@ -383,11 +429,9 @@ summary.tg_chi2 <- function(object)
   paste("    X^2_",object$df,"=",roundfig(object$chi2,2),", P=",roundfig(object$p,3),sep="")
 }
 
-
-#data(pbc)
-pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE)
-test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
-#table <- summaryTG(drug ~ bili, pbc)
+pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE) # Make a factor, instead of guessing
+#test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
+test_table <- tg_summary(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
 flat <- tg_flatten(test_table)
