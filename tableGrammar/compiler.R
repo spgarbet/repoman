@@ -1,12 +1,12 @@
+library(stringr)
+library(Hmisc)
+
 source("tableGrammar/parser.R")
 source("tableGrammar/S3-Cell.R")
 
-library(stringr)
-library(Hmisc)
 getHdata(pbc)
 
 ## Default Summary Functions
-
 
 derive_label <- function(data, column)
 {
@@ -179,12 +179,20 @@ summarize_spearman <- function(data, row, column)
 {
   tbl <- tg_table(1, 3, TRUE)
   
-  # MAYBE, this should use pvrank if it can
+  # Label for the table cell
+  col_lbl <- tg_table(1, 3)
+  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[2]] <- derive_label(data, column)
+  col_lbl[[1]][[3]] <- tg_label("Test Statistic")
+  
+  row_lbl <- derive_label(data, row)
+  
+  # FIXME? MAYBE, this should use pvrank if it can
   test <- cor.test(data[,row], data[,column], alternate="two.sided", method="spearman", na.action=na.omit, exact=FALSE)
   
   n <- length(data[!is.na(data[,row]) & !is.na(data[,column])  ,row])
   
-  tbl[[1]][[1]] <- tg_label(as.character(n) )
+  tbl[[1]][[1]] <- tg_label(as.character(n))
   
   tbl[[1]][[2]] <- tg_estimate(test$estimate)
   
@@ -194,6 +202,9 @@ summarize_spearman <- function(data, row, column)
   
   tbl[[1]][[3]] <- tg_studentt(statistic, n-2, test$p.value)
   
+  attr(tbl, "row_label") <- row_lbl 
+  attr(tbl, "col_label") <- col_lbl
+  tbl
 }
 
 summarize_ordinal_lr <- function(data, row, column)
@@ -201,43 +212,71 @@ summarize_ordinal_lr <- function(data, row, column)
   tg_table(1, 1, TRUE)
 }
 
-# Used to determine "type" of data for transform
-data_type <- function(x)
+
+# Data type tests
+is.wholenumber <- function(x, tol=.Machine$double.eps^0.5)
 {
-  if(     is.ordered(x)) "ordered"
-  else if(is.factor(x) ) "factor"
-  else if(is.logical(x)) "logical"
-  else if(is.numeric(x)) "numeric"
+  abs(x - round(x)) < tol
+}
+
+is.count <- function(x, tol=.Machine$double.eps^0.5)
+{
+  all(is.wholenumber(x, tol) & x >=0, na.rm=TRUE)
+}
+
+is.categorical <- function(x, threshold=NA)
+{
+  is.factor(x) ||
+  (!is.na(threshold) && length(unique(x[! is.na(x)])) < threshold)
+}
+
+is.binomial <- function(x, threshold=NA)
+{
+  (is.factor(x) && length(levels(x)) == 2) ||
+  (!is.na(threshold) && length(unique(x[! is.na(x)])) == 2)
+}
+
+
+# Used to determine "type" of data for transform
+data_type <- function(x, category_threshold=NA)
+{
+  if     (is.ordered(x))                         "ordinal"
+  else if(is.binomial(x,category_threshold))     "binomial"
+  else if(is.categorical(x,category_threshold))  "categorical"
+  else if(is.count(x))                           "count"
+  else if(is.numeric(x))                         "continuous"
   else                   stop(paste("Unsupported class/type - ",class(x), typeof(x)))
 }
 
 # Top  level list is row "class"
 # Next level list is column "class"
 # TODO: ordered needs to be made sensible
+
+
 transformDefaults = list(
-  numeric = list(
-              numeric = summarize_spearman,
-              factor  = summarize_kruskal_horz,
-              logical = summarize_kruskal_horz,
-              ordered = summarize_ordinal_lr
+  continuous  = list(
+                  continuous  = summarize_spearman,
+                  categorical = summarize_kruskal_horz,
+                  binomial    = summarize_kruskal_horz,
+                  ordinal     = summarize_ordinal_lr
             ),
-  factor  = list(
-              numeric = summarize_kruskal_vert,
-              factor  = summarize_chisq,
-              logical = summarize_chisq,
-              ordered = summarize_ordinal_lr
+  categorical = list(
+                  continuous  = summarize_kruskal_vert,
+                  categorical = summarize_chisq,
+                  binomial    = summarize_chisq,
+                  ordinal     = summarize_ordinal_lr
             ),
-  logical = list(
-              numeric = summarize_kruskal_vert,
-              factor  = summarize_chisq,
-              logical = summarize_chisq,
-              ordered = summarize_ordinal_lr
+  binomial    = list(
+                  continuous  = summarize_kruskal_vert,
+                  categorical = summarize_chisq,
+                  binomial    = summarize_chisq,
+                  ordinal     = summarize_ordinal_lr
             ),
-  ordered = list(
-              numeric = summarize_kruskal_vert,
-              factor  = summarize_chisq,
-              logical = summarize_chisq,
-              ordered = summarize_ordinal_lr
+  ordinal     = list(
+                  continuous  = summarize_kruskal_vert,
+                  categorical = summarize_chisq,
+                  binomial    = summarize_chisq,
+                  ordinal     = summarize_ordinal_lr
             )
 )
 
@@ -487,7 +526,7 @@ test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + s
 #test_table <- tg_summary(drug ~ bili, pbc)
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
-summary(table)
+summary(test_table)
 #index(table)
 #html5(table)
 #latex(table)
