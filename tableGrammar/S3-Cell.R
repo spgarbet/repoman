@@ -17,23 +17,14 @@ tg_cell <- function(contents=NA)
   }
 }
 
-rows <- function(x) 
-{
-  UseMethod("rows", x)
-}
-
-cols <- function(x) 
-{
-  UseMethod("cols", x)
-}
 
 
-tg_cell.rows <- function(object)
+rows.tg_cell <- function(object)
 {
   length(object)
 }
 
-tg_cell.cols <- function(object)
+cols.tg_cell <- function(object)
 {
   if(length(object) >= 1)
   {    
@@ -43,6 +34,16 @@ tg_cell.cols <- function(object)
   {
     0
   }
+}
+
+rows <- function(x) 
+{
+  UseMethod("rows", x)
+}
+
+cols <- function(x) 
+{
+  UseMethod("cols", x)
 }
 
 tg_table <- function(rows, cols, embedded=FALSE)
