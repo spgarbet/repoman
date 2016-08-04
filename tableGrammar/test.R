@@ -17,3 +17,6 @@ summary(test_table)
 #index(table)
 #html5(table)
 #latex(table)
+
+
+x <- html5(test_table, caption="Table 9: Descriptive Statistics by drug"); write(x, "tableGrammar/test.html")

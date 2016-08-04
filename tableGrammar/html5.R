@@ -15,7 +15,7 @@ html5.tg_label <- function(object)
   if(is.na(object$units))
       paste("<td class=\"label\">",
             "<div class=\"variable\">",
-            object$label, # FIXME: replace leading spaces with &nbsp;
+            gsub("^\\s+", "&nbsp;&nbsp;", object$label), # FIXME: replace leading spaces with &nbsp;
             "</div>",
             "</td>",
             sep="")
