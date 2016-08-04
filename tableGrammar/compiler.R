@@ -1,10 +1,8 @@
 library(stringr)
-library(Hmisc)
 
 source("tableGrammar/parser.R")
 source("tableGrammar/S3-Cell.R")
-
-getHdata(pbc)
+source("tableGrammar/summary.R")
 
 ## Default Summary Functions
 
@@ -435,18 +433,5 @@ roundfig <- function(vec, n=3)
   formatC(round(vec,digits=n), digits=n, format="f", flag="#") 
 }  
 
-
-lbl_stage <- label(pbc["stage"])
-pbc$stage <- factor(pbc$stage, levels=1:4, ordered=TRUE) # Make a factor, instead of guessing
-label(pbc$stage) <- lbl_stage
-
-test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + spiders, pbc)
-#test_table <- tg_summary(drug ~ bili, pbc)
-#test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
-
-summary(test_table)
-#index(table)
-#html5(table)
-#latex(table)
 
 

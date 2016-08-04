@@ -8,3 +8,4 @@
 *.blg
 *.swp
 .Rproj.user
+.Rhistory
