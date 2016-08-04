@@ -14,9 +14,10 @@ test_table <- tg_summary(drug ~ bili + albumin + stage + protime + sex + age + s
 #test_table <- tg_summary(drug ~ bili + albumin + protime + age, pbc)
 
 summary(test_table)
+
+x <- html5(test_table, caption="Table 9: Descriptive Statistics by drug", css="nejm.css");
+write(x, "tableGrammar/test.html")
+
+# TODO
 #index(table)
-#html5(table)
 #latex(table)
-
-
-x <- html5(test_table, caption="Table 9: Descriptive Statistics by drug"); write(x, "tableGrammar/test.html")

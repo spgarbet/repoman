@@ -1,25 +1,35 @@
 
 body {
-	font-family: "Computer Modern Serif", serif;
+	font-family: Corbel, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, "Verdana Ref", sans-serif;
+  font-size: 75%;
+}
+
+.summaryM thead tr td
+{
+    font-weight: bold;
 }
 
 .figure  {  margin-left:  auto;
-			margin-right: auto;
+			      margin-right: auto;
+			
+	          border: 2px solid black;
          }
 
-.caption { text-align:   center;
-	       margin-left:  auto;
-	       margin-right: auto;
-	       padding: 1.5em 0em 1.5em 0em;
+.caption { text-align:   left;
+           text-indent: 2em;
+	         margin-left:  auto;
+	         margin-right: auto;
+	         padding: 0.5em 0 0.5em 0;
+	         border-bottom: 2px solid black;
+	         font-weight: bold;
+	         background-color: #f7f4ef;
 	     }
 
 .figbody {
 		   text-align:   center;
 	       margin-left:  auto;
 	       margin-right: auto;
-	       border-style: double none solid none;
-	       border-width: 3pt 0 1pt 0;
-	       width:        80%;
+	       width:        100%;
          }
 
 .figbody td {
@@ -32,10 +42,15 @@ body {
 
 .summaryM thead { 
                 }
+.summaryM tbody tr:nth-child(odd) {background: #fffbed;}
 
 .subheader    { font-size: small; } 
-.subheader tr { border-collapse: collapse; }
-.subheader td { border-bottom: 1pt solid black; }
+.subheaderrow tr { border-collapse: collapse; }
+.subheader td { text-align: center; /* border-bottom: 1pt solid black; */ }
+.subheader:before { content: "("; }
+.subheader:after  { content: ")"; }
+
+.subheader em {font-style: normal;}
 
 .quantile {
 	font-size: smaller;

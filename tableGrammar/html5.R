@@ -78,7 +78,7 @@ html5.tg_table <- function(object, css="Hmisc.css", caption="Figure")
   tableHdr <- paste(
     "<thead>",
     "<tr>",pasty[1],"</tr>",
-    "<tr class=\"subheader\">",pasty[2],"</tr>",
+    "<tr class=\"subheaderrow\">",pasty[2],"</tr>",
     sep=""
   )
   
