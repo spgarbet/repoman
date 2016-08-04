@@ -13,7 +13,7 @@ html5.tg_cell <- function(object) "<td></td>"
 html5.tg_subheader <- function(object)
 {
   paste("<td class=\"subheader\">",
-        object$label,
+        gsub("^N=","<em>N</em>=", object$label),
         "</td>",
         sep="")
 }
