@@ -8,14 +8,14 @@ html5 <- function(x, ...)
 
 
 # This is the default, do nothing -- probably should be warning()
-html5.tg_cell <- function(object) "" 
+html5.tg_cell <- function(object) "<td></td>" 
 
 html5.tg_label <- function(object) 
 {
   if(is.na(object$units))
       paste("<td class=\"label\">",
             "<div class=\"variable\">",
-            object$label,
+            object$label, # FIXME: replace leading spaces with &nbsp;
             "</div>",
             "</td>",
             sep="")
@@ -35,22 +35,22 @@ html5.tg_quantile <- function(object)
 {
   paste("<td class=\"quantile\">",
         sigfig(object$q25),
-        "<b>",
+        " <b>",
         sigfig(object$q50),
-        "</b>",
+        "</b> ",
         sigfig(object$q75),
         "</td>",
         sep="")
 }
 
-html5.tg_table <- function(object, css="nejm.css", title="Figure", caption="Figure")
+html5.tg_table <- function(object, css="nejm.css", caption="Figure")
 {
   header <- paste("<!DOCTYPE html><html><head><meta charset=\"UTF-8\">",
-                  paste("<link rel=\"stylesheet\" type=\"text/css\" href=\"", css, "\"/>"),
+                  "<link rel=\"stylesheet\" type=\"text/css\" href=\"", css, "\"/>",
                   "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css\">",
-	                "<title>",title,"</title>",
+	                "<title>",caption,"</title>",
                   "</head><body><div class=\"figure\">",
-                  "<div class=\"caption\">",caption ,"</div>",
+                  "<div class=\"caption\">",caption,"</div>",
 		              "<div class=\"figbody\">",
 			            "<table class=\"summaryM\">",
                   sep="")
@@ -67,20 +67,19 @@ html5.tg_table <- function(object, css="nejm.css", title="Figure", caption="Figu
       text[row,col] <<- html5(object[[row]][[col]])
     })
   })
-  pasty <- apply(text, 1, function(x) paste(x, collapse="  "))
+  pasty <- apply(text, 1, function(x) paste(x, collapse=""))
 
   # FIXME: This is hardcoded at 2!!!!
   tableHdr <- paste(
     "<thead>",
-    pasty[1],
-    pasty[2],
-    "</thead>",
+    "<tr>",pasty[1],"</tr>",
+    "<tr class=\"subheader\">",pasty[2],"</tr>",
     sep=""
   )
   
   tableBdy <- paste(
     "<tbody>",
-    pasty[3:length(pasty)],
+    paste("<tr>",pasty[3:length(pasty)], "</tr>",collapse=""),
     "</tbody>",
     sep="",
     collapse=""
@@ -121,7 +120,7 @@ html5.tg_fraction <- function(object)
   
   paste("<td class=\"percent\">",
         num,
-        "<div class=\"align\">%</div>",
+        "<div class=\"align\">%</div> ",
         "<sup>",
         den,
         "</sup>&frasl;<sub>",
