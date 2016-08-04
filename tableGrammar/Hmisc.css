@@ -61,7 +61,7 @@ body {
 sub { font-size: x-small; }
 sup { font-size: x-small; }
 
-td div.align{
+td .align{
 	display: inline-block;
 	margin: 0 auto;
 }
