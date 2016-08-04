@@ -38,8 +38,8 @@ summarize_kruskal_horz <- function(data, row, column)
   # Label for the table cell
   row_lbl <- derive_label(data, row)
   col_lbl <- tg_table(2, 2+length(categories))
-  col_lbl[[1]][[1]] <- tg_label("N")
-  col_lbl[[1]][[length(categories)+2]] <- tg_label("Test Statistic")
+  col_lbl[[1]][[1]] <- tg_header("N")
+  col_lbl[[1]][[length(categories)+2]] <- tg_header("Test Statistic")
   
   # N value
   N <- sum(!is.na(data[,row]))
@@ -49,8 +49,8 @@ summarize_kruskal_horz <- function(data, row, column)
   sapply(1:length(categories), FUN=function(category) {
     x <- data[data[,column] == categories[category], row]
     tbl[[1]][[category+1]] <<- tg_quantile(quantile(x, na.rm=TRUE))
-    col_lbl[[1]][[category+1]] <<- tg_label(categories[category])
-    col_lbl[[2]][[category+1]] <<- tg_label(paste("N=",sum(!is.na(x)),sep=''))
+    col_lbl[[1]][[category+1]] <<- tg_header(categories[category])
+    col_lbl[[2]][[category+1]] <<- tg_subheader(paste("N=",sum(!is.na(x)),sep=''))
   })
   
   # Kruskal-Wallis via F-distribution
@@ -73,9 +73,9 @@ summarize_kruskal_vert <- function(data, row, column)
   col_lbl <- tg_table(1, 3)
   row_lbl <- tg_table(length(categories), 1)
   
-  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[1]] <- tg_header("N")
   col_lbl[[1]][[2]] <- derive_label(data, column)
-  col_lbl[[1]][[3]] <- tg_label("Test Statistic")
+  col_lbl[[1]][[3]] <- tg_header("Test Statistic")
 
   tbl <- tg_table(length(categories), 3, TRUE) # no. categories X 3
   
@@ -117,8 +117,8 @@ summarize_chisq <- function(data, row, column)
     row_lbl[[level]][[1]] <<- tg_label(paste("  ", row_categories[level]))
   })
   col_lbl <- tg_table(2, 2+length(col_categories))
-  col_lbl[[1]][[1]] <- tg_label("N")
-  col_lbl[[1]][[length(col_categories)+2]] <- tg_label("Test Statistic")
+  col_lbl[[1]][[1]] <- tg_header("N")
+  col_lbl[[1]][[length(col_categories)+2]] <- tg_header("Test Statistic")
   
   # N X (M+2)
   tbl <- tg_table(n, m+2, TRUE)
@@ -141,8 +141,8 @@ summarize_chisq <- function(data, row, column)
         tbl[[row_category]][[col_category+1]] <<- tg_fraction(numerator, denominator)
       }
     })
-    col_lbl[[1]][[col_category+1]] <<- tg_label(col_categories[col_category])
-    col_lbl[[2]][[col_category+1]] <<- tg_label(paste("N=",sum(!is.na(c_x)),sep=''))
+    col_lbl[[1]][[col_category+1]] <<- tg_header(col_categories[col_category])
+    col_lbl[[2]][[col_category+1]] <<- tg_subheader(paste("N=",sum(!is.na(c_x)),sep=''))
   })
   
   y <- table(data[,row],data[,column], useNA="no")
@@ -179,9 +179,9 @@ summarize_spearman <- function(data, row, column)
   
   # Label for the table cell
   col_lbl <- tg_table(1, 3)
-  col_lbl[[1]][[1]] <- tg_label("N")
+  col_lbl[[1]][[1]] <- tg_header("N")
   col_lbl[[1]][[2]] <- derive_label(data, column)
-  col_lbl[[1]][[3]] <- tg_label("Test Statistic")
+  col_lbl[[1]][[3]] <- tg_header("Test Statistic")
   
   row_lbl <- derive_label(data, row)
   

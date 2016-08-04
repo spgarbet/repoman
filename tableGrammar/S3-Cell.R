@@ -57,9 +57,20 @@ tg_table <- function(rows, cols, embedded=FALSE)
   tbl
 }
 
+
 tg_label <- function(text, units=NA)
 {
   structure(tg_cell(list(label=as.character(text), units=as.character(units))), class = c("tg_label", "tg_cell"))
+}
+
+tg_header <- function(text, units=NA)
+{
+  structure(tg_cell(list(label=as.character(text), units=as.character(units))), class = c("tg_header", "tg_label", "tg_cell"))
+}
+
+tg_subheader <- function(text, units=NA)
+{
+  structure(tg_cell(list(label=as.character(text), units=as.character(units))), class = c("tg_subheader", "tg_header", "tg_label", "tg_cell"))
 }
 
 tg_quantile <- function(quantiles)

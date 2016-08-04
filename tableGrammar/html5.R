@@ -10,6 +10,22 @@ html5 <- function(x, ...)
 # This is the default, do nothing -- probably should be warning()
 html5.tg_cell <- function(object) "<td></td>" 
 
+html5.tg_subheader <- function(object)
+{
+  paste("<td class=\"subheader\">",
+        object$label,
+        "</td>",
+        sep="")
+}
+
+html5.tg_header <- function(object)
+{
+  paste("<td>",
+        object$label,
+        "</td>",
+        sep="")
+}
+
 html5.tg_label <- function(object) 
 {
   if(is.na(object$units))
@@ -31,19 +47,8 @@ html5.tg_label <- function(object)
             sep="")
 }
 
-html5.tg_quantile <- function(object)
-{
-  paste("<td class=\"quantile\">",
-        sigfig(object$q25),
-        " <b>",
-        sigfig(object$q50),
-        "</b> ",
-        sigfig(object$q75),
-        "</td>",
-        sep="")
-}
 
-html5.tg_table <- function(object, css="nejm.css", caption="Figure")
+html5.tg_table <- function(object, css="Hmisc.css", caption="Figure")
 {
   header <- paste("<!DOCTYPE html><html><head><meta charset=\"UTF-8\">",
                   "<link rel=\"stylesheet\" type=\"text/css\" href=\"", css, "\"/>",
@@ -88,14 +93,34 @@ html5.tg_table <- function(object, css="nejm.css", caption="Figure")
   paste(header, tableHdr, tableBdy, footer, sep="\n")
 }
 
-# FIXME: This isn't in the example html
 html5.tg_estimate <- function(object)
 {
   if(is.na(object$low))
-    as.character(object$value)
-  else
-    paste(object$value, " (",object$low,",",object$high,")")
+    paste("<td class=\"estimate\"><b>",
+          object$low,
+          "</b></td>",
+          sep="")
+  else      
+    paste("<td class=\"estimate\"><b>",
+          object$low,
+          "</b>",
+          " (",object$low,",",object$high,")",
+          "</td>",
+          sep="")
 }
+
+html5.tg_quantile <- function(object)
+{
+  paste("<td class=\"quantile\">",
+        sigfig(object$q25),
+        " <b>",
+        sigfig(object$q50),
+        "</b> ",
+        sigfig(object$q75),
+        "</td>",
+        sep="")
+}
+
 
 html5.tg_fstat <- function(object)
 {
@@ -119,12 +144,12 @@ html5.tg_fraction <- function(object)
   num <- sprintf(paste("%",nchar(den),"s",sep=''), object$numerator)
   
   paste("<td class=\"percent\">",
-        num,
+        x,
         "<div class=\"align\">%</div> ",
         "<sup>",
-        den,
-        "</sup>&frasl;<sub>",
         num,
+        "</sup>&frasl;<sub>",
+        den,
         "</sub>",
         "</td>",
         sep="")
